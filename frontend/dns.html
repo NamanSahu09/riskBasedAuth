@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecureCheck – DNS Lookup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-area"><div class="logo-icon">🛡️</div><span class="nav-label logo-name">SecureCheck</span></div>
+    <nav class="nav">
+      <a href="index.html"     class="nav-item" title="Dashboard"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m5-8l2 2"/></svg><span class="nav-label">Dashboard</span></a>
+      <a href="check.html"    class="nav-item" title="Check Website"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg><span class="nav-label">Check Website</span></a>
+      <a href="history.html"  class="nav-item" title="Scan History"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg><span class="nav-label">Scan History</span></a>
+      <a href="threats.html"  class="nav-item" title="Threats"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><span class="nav-label">Threats</span></a>
+      <a href="ssl.html"      class="nav-item" title="SSL / TLS"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" d="M7 11V7a5 5 0 0110 0v4"/></svg><span class="nav-label">SSL / TLS</span></a>
+      <a href="dns.html"      class="nav-item active" title="DNS Lookup"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg><span class="nav-label">DNS Lookup</span></a>
+      <a href="reports.html"  class="nav-item" title="Reports"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"/></svg><span class="nav-label">Reports</span></a>
+      <a href="analytics.html" class="nav-item" title="Analytics"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span class="nav-label">Analytics</span></a>
+      <a href="settings.html" class="nav-item" title="Settings"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg><span class="nav-label">Settings</span></a>
+    </nav>
+    <div class="sidebar-bottom"><button class="collapse-btn" id="collapseBtn" title="Collapse"><svg class="collapse-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg><span class="nav-label">Collapse</span></button></div>
+  </aside>
+  <main class="main" id="mainContent">
+    <div class="topbar">
+      <div class="topbar-title"><h1>DNS Lookup</h1><p>Query DNS records for any domain</p></div>
+      <div class="status-pill"><div class="status-dot"></div>All systems operational</div>
+    </div>
+    <div class="content">
+      <div class="page-body">
+        <div class="page-header"><h2>🌐 DNS Lookup</h2><p>Query DNS records for any domain</p></div>
+        <div class="card">
+  <div class="card-title">DNS Lookup Tool</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+    <input class="input-field" type="text" placeholder="example.com" style="flex:1;min-width:200px;">
+    <select class="input-field" style="width:120px;"><option>A</option><option>AAAA</option><option>MX</option><option>TXT</option><option>CNAME</option><option>NS</option></select>
+    <button class="btn btn-primary">🌐 Lookup</button>
+  </div>
+  <table class="data-table">
+    <thead><tr><th>Type</th><th>Name</th><th>Value</th><th>TTL</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-info">A</span></td><td>google.com</td><td style="font-family:monospace;font-size:12px;">142.250.185.46</td><td style="color:var(--muted)">300s</td></tr>
+      <tr><td><span class="badge badge-info">MX</span></td><td>google.com</td><td style="font-family:monospace;font-size:12px;">aspmx.l.google.com</td><td style="color:var(--muted)">300s</td></tr>
+      <tr><td><span class="badge badge-info">NS</span></td><td>google.com</td><td style="font-family:monospace;font-size:12px;">ns1.google.com</td><td style="color:var(--muted)">21600s</td></tr>
+      <tr><td><span class="badge badge-info">TXT</span></td><td>google.com</td><td style="font-family:monospace;font-size:12px;">v=spf1 include:_spf.google.com ~all</td><td style="color:var(--muted)">3600s</td></tr>
+    </tbody>
+  </table>
+</div>
+      </div>
+    </div>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

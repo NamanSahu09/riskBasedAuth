@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecureCheck – Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-area">
+      <div class="logo-icon">🛡️</div>
+      <span class="nav-label logo-name">SecureCheck</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html" class="nav-item active" title="Dashboard">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m5-8l2 2"/></svg>
+        <span class="nav-label">Dashboard</span>
+      </a>
+      <a href="check.html" class="nav-item" title="Check Website">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+        <span class="nav-label">Check Website</span>
+      </a>
+      <a href="history.html" class="nav-item" title="Scan History">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+        <span class="nav-label">Scan History</span>
+      </a>
+      <a href="threats.html" class="nav-item" title="Threats">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        <span class="nav-label">Threats</span>
+      </a>
+      <a href="ssl.html" class="nav-item" title="SSL / TLS">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <span class="nav-label">SSL / TLS</span>
+      </a>
+      <a href="dns.html" class="nav-item" title="DNS Lookup">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>
+        <span class="nav-label">DNS Lookup</span>
+      </a>
+      <a href="reports.html" class="nav-item" title="Reports">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"/></svg>
+        <span class="nav-label">Reports</span>
+      </a>
+      <a href="analytics.html" class="nav-item" title="Analytics">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <span class="nav-label">Analytics</span>
+      </a>
+      <a href="settings.html" class="nav-item" title="Settings">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span class="nav-label">Settings</span>
+      </a>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="collapse-btn" id="collapseBtn" title="Collapse">
+        <svg class="collapse-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        <span class="nav-label">Collapse</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main class="main" id="mainContent">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1>Website Security Checker</h1>
+        <p>Scan any URL for vulnerabilities instantly</p>
+      </div>
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        All systems operational
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-eyebrow">
+          <div class="dot"></div>
+          Real-Time Security Analysis
+          <div class="dot"></div>
+        </div>
+        <h1 class="hero-h1">Is That Website <span class="safe">Safe?</span></h1>
+        <p class="hero-desc">
+          Instantly scan any URL for SSL issues, malware, phishing, DNS vulnerabilities,
+          and more — all in one place.
+        </p>
+        <div class="url-bar" id="urlBar">
+          <span class="globe-icon">🌐</span>
+          <input id="urlInput" type="text" placeholder="Enter website URL (e.g. https://example.com)">
+          <button class="scan-btn" id="scanBtn">
+            <span class="scan-icon">🔍</span><span class="btn-text"> Scan Now</span>
+          </button>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="val">10M+</div><div class="lbl">Scans Done</div></div>
+          <div class="hero-stat"><div class="val">99.9%</div><div class="lbl">Uptime</div></div>
+          <div class="hero-stat"><div class="val">&lt;2s</div><div class="lbl">Avg Scan Time</div></div>
+        </div>
+      </section>
+
+      <!-- METRICS -->
+      <div class="metrics">
+        <div class="metric-card">
+          <div class="metric-label cyan">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Sites Scanned Today
+          </div>
+          <div class="metric-value cyan" id="scanCount">4,821</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label green">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+            Threats Blocked
+          </div>
+          <div class="metric-value green">1,293</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label orange">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            High Risk Sites
+          </div>
+          <div class="metric-value orange">342</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label yellow">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Avg Response Time
+          </div>
+          <div class="metric-value yellow">1.8s</div>
+        </div>
+      </div>
+
+      <!-- RECENT SCANS -->
+      <div class="recent-section">
+        <h2 class="section-title">Recent Scans</h2>
+        <div class="scan-list">
+          <div class="scan-row">
+            <div class="scan-shield secure"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+            <span class="scan-url">https://google.com</span>
+            <span class="scan-status secure">Secure</span>
+            <span class="scan-score secure">98/100</span>
+            <a class="scan-link" href="https://google.com" target="_blank"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
+          </div>
+          <div class="scan-row">
+            <div class="scan-shield danger"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div>
+            <span class="scan-url">https://suspicious-site.net</span>
+            <span class="scan-status danger">Dangerous</span>
+            <span class="scan-score danger">28/100</span>
+            <a class="scan-link" href="#"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
+          </div>
+          <div class="scan-row">
+            <div class="scan-shield secure"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+            <span class="scan-url">https://github.com</span>
+            <span class="scan-status secure">Secure</span>
+            <span class="scan-score secure">95/100</span>
+            <a class="scan-link" href="https://github.com" target="_blank"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
+          </div>
+          <div class="scan-row">
+            <div class="scan-shield moderate"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+            <span class="scan-url">https://free-virus-scan.xyz</span>
+            <span class="scan-status moderate">Moderate</span>
+            <span class="scan-score moderate">42/100</span>
+            <a class="scan-link" href="#"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
+          </div>
+          <div class="scan-row">
+            <div class="scan-shield secure"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+            <span class="scan-url">https://amazon.com</span>
+            <span class="scan-status secure">Secure</span>
+            <span class="scan-score secure">92/100</span>
+            <a class="scan-link" href="https://amazon.com" target="_blank"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
