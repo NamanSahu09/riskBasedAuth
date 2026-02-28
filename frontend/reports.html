@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecureCheck – Reports</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── REPORT-SPECIFIC STYLES ── */
+    .report-topnav {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      background: var(--bg);
+    }
+    .rnav-tab {
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .15s;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .rnav-tab:hover { color: var(--text); }
+    .rnav-tab.active { color: var(--cyan); border-bottom-color: var(--cyan); font-weight: 600; }
+
+    /* ── RISK STATUS BAR CARDS ── */
+    .status-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .sbar-card {
+      flex: 1;
+      min-width: 90px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .sbar-card:hover { border-color: #30363d; background: #161b22; }
+    .sbar-card .sbc-num {
+      font-size: 28px; font-weight: 900;
+      letter-spacing: -1px; line-height: 1;
+    }
+    .sbar-card .sbc-lbl {
+      font-size: 10px; font-weight: 600;
+      color: var(--muted); margin-top: 5px;
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .sbar-card.all    .sbc-num { color: var(--cyan); }
+    .sbar-card.assessed .sbc-num { color: var(--green); }
+    .sbar-card.not-assessed .sbc-num { color: var(--red); }
+    .sbar-card.in-progress .sbc-num { color: #60a5fa; }
+    .sbar-card.needs-rem .sbc-num { color: var(--orange); }
+    .sbar-card.remediated .sbc-num { color: var(--green); }
+    .sbar-card.closed .sbc-num { color: var(--muted); }
+
+    /* ── CHARTS 2-COL GRID ── */
+    .charts-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .charts-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .charts-grid-32 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+    /* ── CHART CARD ── */
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .cc-header {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .cc-title {
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .cc-info {
+      font-size: 13px; color: var(--muted); cursor: help;
+    }
+
+    /* ── POWER BI EMBED FRAME ── */
+    .pbi-slot {
+      flex: 1;
+      min-height: 200px;
+      background: #0a0f1a;
+      border: 1px dashed #1e3050;
+      border-radius: 8px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .pbi-slot::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(-45deg, transparent, transparent 18px, rgba(34,211,238,.012) 18px, rgba(34,211,238,.012) 19px);
+    }
+    .pbi-slot .pbi-icon { font-size: 28px; position: relative; z-index: 1; }
+    .pbi-slot .pbi-text {
+      font-size: 11px; color: var(--muted); text-align: center;
+      font-family: 'Inter', monospace; line-height: 1.6;
+      position: relative; z-index: 1;
+    }
+    .pbi-slot .pbi-text strong { display: block; color: var(--cyan); font-size: 12px; margin-bottom: 2px; }
+    .pbi-tag {
+      background: rgba(34,211,238,.08);
+      border: 1px solid rgba(34,211,238,.18);
+      color: var(--cyan); font-size: 9px;
+      padding: 3px 10px; border-radius: 20px;
+      letter-spacing: 1px; font-weight: 600;
+      position: relative; z-index: 1;
+    }
+
+    /* ── RISK TABLE ── */
+    .risk-table-wrap { overflow-x: auto; }
+    .risk-table { width: 100%; border-collapse: collapse; }
+    .risk-table th {
+      text-align: left; padding: 9px 14px;
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .8px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+    }
+    .risk-table td {
+      padding: 11px 14px; font-size: 13px;
+      border-bottom: 1px solid rgba(30,39,48,.5);
+      vertical-align: middle;
+    }
+    .risk-table tr:last-child td { border-bottom: none; }
+    .risk-table tr:hover td { background: rgba(255,255,255,.015); }
+
+    .risk-link { color: var(--cyan); text-decoration: none; font-weight: 500; font-size: 12px; }
+    .risk-link:hover { text-decoration: underline; }
+
+    /* ── SEVERITY PILLS ── */
+    .pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; letter-spacing: .3px;
+    }
+    .pill.severe   { background: rgba(248,81,73,.15); color: #f85149; }
+    .pill.high     { background: rgba(245,158,11,.12); color: #f59e0b; }
+    .pill.medium   { background: rgba(249,115,22,.1);  color: #f97316; }
+    .pill.low      { background: rgba(63,185,80,.1);   color: #3fb950; }
+    .pill.reallylow{ background: rgba(34,211,238,.08); color: var(--cyan); }
+
+    /* ── CATEGORY TABLE ── */
+    .cat-table { width: 100%; border-collapse: collapse; }
+    .cat-table td { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .cat-table tr:last-child td { border-bottom: none; }
+    .cat-table .cat-name { flex: 1; }
+    .cat-table .cat-count { font-weight: 700; text-align: right; }
+
+    /* ── SELECT DROPDOWN ── */
+    .risk-type-sel {
+      background: #161b22; border: 1px solid #30363d;
+      border-radius: 6px; padding: 6px 10px;
+      color: var(--text); font-size: 12px; font-family: 'Inter', sans-serif;
+      outline: none; cursor: pointer; min-width: 120px;
+    }
+
+    /* ── WEEKLY/MONTHLY TOGGLE ── */
+    .toggle-group { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .tgl-btn {
+      padding: 5px 12px; font-size: 12px; font-weight: 500;
+      background: transparent; border: none; color: var(--muted);
+      cursor: pointer; transition: all .15s; font-family: 'Inter', sans-serif;
+    }
+    .tgl-btn.active { background: var(--cyan); color: #000; font-weight: 700; }
+    .tgl-btn:not(.active):hover { color: var(--text); }
+
+    @media (max-width: 1100px) {
+      .charts-grid-3  { grid-template-columns: 1fr 1fr; }
+      .charts-grid-32 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .charts-grid-2, .charts-grid-3 { grid-template-columns: 1fr; }
+      .status-bar .sbar-card { min-width: 80px; }
+      .report-topnav { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-area"><div class="logo-icon">🛡️</div><span class="nav-label logo-name">SecureCheck</span></div>
+    <nav class="nav">
+      <a href="index.html"     class="nav-item" title="Dashboard"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m5-8l2 2"/></svg><span class="nav-label">Dashboard</span></a>
+      <a href="check.html"    class="nav-item" title="Check Website"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg><span class="nav-label">Check Website</span></a>
+      <a href="history.html"  class="nav-item" title="Scan History"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg><span class="nav-label">Scan History</span></a>
+      <a href="threats.html"  class="nav-item" title="Threats"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><span class="nav-label">Threats</span></a>
+      <a href="ssl.html"      class="nav-item" title="SSL / TLS"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" d="M7 11V7a5 5 0 0110 0v4"/></svg><span class="nav-label">SSL / TLS</span></a>
+      <a href="dns.html"      class="nav-item" title="DNS Lookup"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg><span class="nav-label">DNS Lookup</span></a>
+      <a href="reports.html"  class="nav-item active" title="Reports"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"/></svg><span class="nav-label">Reports</span></a>
+      <a href="analytics.html" class="nav-item" title="Analytics"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span class="nav-label">Analytics</span></a>
+      <a href="settings.html" class="nav-item" title="Settings"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg><span class="nav-label">Settings</span></a>
+    </nav>
+    <div class="sidebar-bottom"><button class="collapse-btn" id="collapseBtn" title="Collapse"><svg class="collapse-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg><span class="nav-label">Collapse</span></button></div>
+  </aside>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main class="main" id="mainContent">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1>Reports <span style="font-size:12px;color:var(--muted);font-weight:400;margin-left:8px;">Risk Register</span></h1>
+        <p>Dynamic risk data powered by MySQL + Power BI</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
+        <button class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">📥 Export PDF</button>
+        <button class="btn btn-primary" style="font-size:12px;padding:7px 14px;">📊 Export CSV</button>
+        <div class="status-pill"><div class="status-dot"></div>All systems operational</div>
+      </div>
+    </div>
+
+    <!-- REPORT SUB-NAV TABS -->
+    <div class="report-topnav">
+      <a href="#" class="rnav-tab active" onclick="switchTab(event,'dashboard')">Dashboard</a>
+      <a href="#" class="rnav-tab" onclick="switchTab(event,'list')">List</a>
+      <a href="#" class="rnav-tab" onclick="switchTab(event,'snapshots')">Snapshots</a>
+    </div>
+
+    <!-- ══ TAB: DASHBOARD ══ -->
+    <div id="tab-dashboard" class="tab-panel" style="padding:24px 28px;display:flex;flex-direction:column;gap:20px;">
+
+      <!-- ROW 1: Overall Risk + Risk Status -->
+      <div class="charts-grid-2">
+
+        <!-- Overall Risk -->
+        <div class="chart-card">
+          <div class="cc-header">
+            <div class="cc-title">Overall Risk <span class="cc-info" title="Overall risk level calculated from MySQL scan data">ℹ️</span></div>
+          </div>
+          <div class="pbi-slot" style="min-height:160px;">
+            <div class="pbi-icon">📊</div>
+            <div class="pbi-text"><strong>Power BI Embed</strong>Overall Risk Donut Chart<br><span style="font-size:10px;">Data source: MySQL → risk_assessments table</span></div>
+            <div class="pbi-tag">POWERBI IFRAME HERE</div>
+          </div>
+        </div>
+
+        <!-- Risk Status -->
+        <div class="chart-card">
+          <div class="cc-header">
+            <div class="cc-title">Risk Status <span class="cc-info" title="Status breakdown from MySQL">ℹ️</span></div>
+          </div>
+          <!-- Status summary bar -->
+          <div class="status-bar">
+            <div class="sbar-card all">     <div class="sbc-num">164</div><div class="sbc-lbl">All Risk</div></div>
+            <div class="sbar-card assessed"><div class="sbc-num">5</div>  <div class="sbc-lbl">Assessed</div></div>
+            <div class="sbar-card not-assessed"><div class="sbc-num">120</div><div class="sbc-lbl">Not Assessed</div></div>
+            <div class="sbar-card in-progress"><div class="sbc-num">34</div><div class="sbc-lbl">In Progress</div></div>
+            <div class="sbar-card needs-rem"><div class="sbc-num">3</div>  <div class="sbc-lbl">Needs Remediation</div></div>
+            <div class="sbar-card remediated"><div class="sbc-num">1</div> <div class="sbc-lbl">Remediated</div></div>
+            <div class="sbar-card closed">  <div class="sbc-num">1</div>  <div class="sbc-lbl">Closed</div></div>
+          </div>
+          <div class="pbi-slot" style="min-height:120px;">
+            <div class="pbi-icon">🥧</div>
+            <div class="pbi-text"><strong>Power BI Embed</strong>Risk Status Pie Chart<br><span style="font-size:10px;">Data source: MySQL → scan_status table</span></div>
+            <div class="pbi-tag">POWERBI IFRAME HERE</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ROW 2: Rating Breakdown + Heat Map + Action Plan -->
+      <div class="charts-grid-3">
+
+        <!-- Risk Rating Breakdown -->
+        <div class="chart-card">
+          <div class="cc-header">
+            <div class="cc-title">Risk Rating Breakdown <span class="cc-info">ℹ️</span></div>
+          </div>
+          <div class="pbi-slot" style="min-height:220px;">
+            <div class="pbi-icon">🍩</div>
+            <div class="pbi-text"><strong>Power BI Embed</strong>Rating Breakdown Donut<br><span style="font-size:10px;">MySQL → risk_ratings table</span></div>
+            <div class="pbi-tag">POWERBI IFRAME HERE</div>
+          </div>
+        </div>
+
+        <!-- Risk Heat Map -->
+        <div class="chart-card">
+          <div class="cc-header">
+            <div class="cc-title">Risk Heat Map <span class="cc-info">ℹ️</span></div>
+            <div>
+              <select class="risk-type-sel" onchange="this.blur()">
+                <option>Inherent</option>
+                <option>Residual</option>
+                <option>Target</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;font-size:11px;color:var(--muted);margin-bottom:4px;align-items:center;">
+            <span>Impact ↑</span>
+            <span style="flex:1;text-align:right;">Likelihood →</span>
+          </div>
+          <div class="pbi-slot" style="min-height:190px;">
+            <div class="pbi-icon">🔥</div>
+            <div class="pbi-text"><strong>Power BI Embed</strong>Risk Heat Map Matrix<br><span style="font-size:10px;">MySQL → risk_matrix table</span></div>
+            <div class="pbi-tag">POWERBI IFRAME HERE</div>
+          </div>
+        </div>
+
+        <!-- Risks by Category -->
+        <div class="chart-card">
+          <div class="cc-header">
+            <div class="cc-title">Risks by Category <span class="cc-info">ℹ️</span></div>
+          </div>
+          <table class="cat-table">
+            <tr>
+              <td><a href="#" class="risk-link">Asset Management dgd</a></td>
+              <td class="cat-count" style="color:var(--red);">15</td>
+            </tr>
+            <tr>
+              <td><a href="#" class="risk-link">Risk Assessment</a></td>
+              <td class="cat-count">3</td>
+            </tr>
+            <tr>
+              <td><a href="#" class="risk-link">Data Security</a></td>
+              <td class="cat-count">3</td>
+            </tr>
+            <tr>
+              <td><a href="#" class="risk-link">Communications</a></td>
+              <td class="cat-count">3</td>
+            </tr>
+            <tr>
+              <td><a href="#" class="risk-link">Risk Management Strategy</a></td>
+              <td class="cat-count">2</td>
+            </tr>
+          </table>
+          <a href="#" style="color:var(--cyan);font-size:12px;text-decoration:none;">→ Go to all categories</a>
+        </div>
+
+      </div>
+
+      <!-- ROW 3: Action Plan + Top Risks + Trend -->
+      <div class="charts-grid-32">
+
+        <!-- Left: Top Company Risks table -->
+        <div class="chart-card">
+          <div class="cc-header">
+            <div class="cc-title">Top Company Risks <span class="cc-info">ℹ️</span></div>
+            <span style="font-size:11px;color:var(--muted);">Live from MySQL</span>
+          </div>
+          <div class="risk-table-wrap">
+            <table class="risk-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Inherent Risk</th>
+                  <th>Current Risk</th>
+                  <th>Target Risk</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><a href="#" class="risk-link">RSK-34</a></td>
+                  <td><span class="pill severe">Severe (20)</span></td>
+                  <td><span class="pill severe">Severe (20)</span></td>
+                  <td><span class="pill reallylow">Really Low (1)</span></td>
+                </tr>
+                <tr>
+                  <td><a href="#" class="risk-link">RSK-28</a></td>
+                  <td><span class="pill high">High (15)</span></td>
+                  <td><span class="pill high">High (12)</span></td>
+                  <td><span class="pill low">Low (3)</span></td>
+                </tr>
+                <tr>
+                  <td><a href="#" class="risk-link">RSK-19</a></td>
+                  <td><span class="pill medium">Medium (10)</span></td>
+                  <td><span class="pill medium">Medium (8)</span></td>
+                  <td><span class="pill low">Low (2)</span></td>
+                </tr>
+                <tr>
+                  <td><a href="#" class="risk-link">RSK-11</a></td>
+                  <td><span class="pill high">High (16)</span></td>
+                  <td><span class="pill medium">Medium (9)</span></td>
+                  <td><span class="pill low">Low (4)</span></td>
+                </tr>
+                <tr>
+                  <td><a href="#" class="risk-link">RSK-07</a></td>
+                  <td><span class="pill severe">Severe (18)</span></td>
+                  <td><span class="pill high">High (14)</span></td>
+                  <td><span class="pill reallylow">Really Low (2)</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right: Action Plan + Trend -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Action Plan Breakdown -->
+          <div class="chart-card">
+            <div class="cc-header">
+              <div class="cc-title">Action Plan Breakdown <span class="cc-info">ℹ️</span></div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+              <span style="font-size:11px;color:#60a5fa;">● Transfer 40%</span>
+              <span style="font-size:11px;color:var(--green);">● Avoid 20%</span>
+              <span style="font-size:11px;color:var(--cyan);">● Reduce 40%</span>
+            </div>
+            <div class="pbi-slot" style="min-height:130px;">
+              <div class="pbi-icon">📋</div>
+              <div class="pbi-text"><strong>Power BI Embed</strong>Action Plan Donut<br><span style="font-size:10px;">MySQL → action_plans table</span></div>
+              <div class="pbi-tag">POWERBI IFRAME HERE</div>
+            </div>
+          </div>
+
+          <!-- Risk Trend -->
+          <div class="chart-card">
+            <div class="cc-header">
+              <div class="cc-title">Risk Trend <span class="cc-info">ℹ️</span></div>
+              <div class="toggle-group">
+                <button class="tgl-btn active" onclick="toggleBtn(this)">Weekly</button>
+                <button class="tgl-btn" onclick="toggleBtn(this)">Monthly</button>
+              </div>
+            </div>
+            <div class="pbi-slot" style="min-height:130px;">
+              <div class="pbi-icon">📉</div>
+              <div class="pbi-text"><strong>Power BI Embed</strong>Risk Trend Line Chart<br><span style="font-size:10px;">MySQL → risk_history table</span></div>
+              <div class="pbi-tag">POWERBI IFRAME HERE</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ROW 4: Snapshot History full width -->
+      <div class="chart-card">
+        <div class="cc-header">
+          <div class="cc-title">Snapshot History <span class="cc-info">ℹ️</span></div>
+          <div style="display:flex;gap:16px;align-items:center;font-size:11px;color:var(--muted);">
+            <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:3px;background:var(--yellow);border-radius:2px;display:inline-block;"></span>Current</span>
+            <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:3px;background:var(--red);border-radius:2px;display:inline-block;"></span>Inherit</span>
+            <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:3px;background:var(--green);border-radius:2px;display:inline-block;"></span>Target</span>
+          </div>
+        </div>
+        <div class="pbi-slot" style="min-height:150px;">
+          <div class="pbi-icon">📈</div>
+          <div class="pbi-text"><strong>Power BI Embed</strong>Snapshot History — Current / Inherit / Target Line Chart<br><span style="font-size:10px;">MySQL → snapshots table | Replace this slot with your Power BI embed iframe</span></div>
+          <div class="pbi-tag">POWERBI IFRAME HERE</div>
+        </div>
+      </div>
+
+    </div><!-- /tab-dashboard -->
+
+    <!-- ══ TAB: LIST ══ -->
+    <div id="tab-list" class="tab-panel" style="display:none;padding:24px 28px;">
+      <div class="chart-card">
+        <div class="cc-header" style="margin-bottom:14px;">
+          <div class="cc-title">All Risks — Risk Register</div>
+          <div style="display:flex;gap:8px;">
+            <input class="input-field" type="text" placeholder="🔍 Search risks..." style="width:220px;padding:7px 12px;font-size:13px;">
+            <button class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">Filter</button>
+          </div>
+        </div>
+        <div class="risk-table-wrap">
+          <table class="risk-table">
+            <thead>
+              <tr>
+                <th>Risk ID</th><th>Name</th><th>Category</th><th>Inherent</th><th>Current</th><th>Target</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="riskListBody">
+              <!-- Populated dynamically via PHP/MySQL API call -->
+              <tr><td><a href="#" class="risk-link">RSK-34</a></td><td>Unpatched CVE on web server</td><td>Asset Management</td><td><span class="pill severe">Severe (20)</span></td><td><span class="pill severe">Severe (20)</span></td><td><span class="pill reallylow">Really Low (1)</span></td><td><span class="badge badge-danger">Not Assessed</span></td></tr>
+              <tr><td><a href="#" class="risk-link">RSK-28</a></td><td>SSL certificate expiry</td><td>Data Security</td><td><span class="pill high">High (15)</span></td><td><span class="pill high">High (12)</span></td><td><span class="pill low">Low (3)</span></td><td><span class="badge badge-moderate">In Progress</span></td></tr>
+              <tr><td><a href="#" class="risk-link">RSK-19</a></td><td>Weak DNS configuration</td><td>Communications</td><td><span class="pill medium">Medium (10)</span></td><td><span class="pill medium">Medium (8)</span></td><td><span class="pill low">Low (2)</span></td><td><span class="badge badge-moderate">In Progress</span></td></tr>
+              <tr><td><a href="#" class="risk-link">RSK-11</a></td><td>Missing HTTP security headers</td><td>Risk Assessment</td><td><span class="pill high">High (16)</span></td><td><span class="pill medium">Medium (9)</span></td><td><span class="pill low">Low (4)</span></td><td><span class="badge badge-secure">Assessed</span></td></tr>
+              <tr><td><a href="#" class="risk-link">RSK-07</a></td><td>Open redirect vulnerability</td><td>Risk Mgmt Strategy</td><td><span class="pill severe">Severe (18)</span></td><td><span class="pill high">High (14)</span></td><td><span class="pill reallylow">Really Low (2)</span></td><td><span class="badge badge-danger">Needs Remediation</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:12px;font-style:italic;">
+          💡 Connect to MySQL: replace static rows with PHP fetch from <code style="background:#1e2730;padding:2px 6px;border-radius:4px;">risks</code> table via your backend API.
+        </p>
+      </div>
+    </div>
+
+    <!-- ══ TAB: SNAPSHOTS ══ -->
+    <div id="tab-snapshots" class="tab-panel" style="display:none;padding:24px 28px;">
+      <div class="chart-card">
+        <div class="cc-header" style="margin-bottom:14px;">
+          <div class="cc-title">Snapshot History</div>
+          <button class="btn btn-primary" style="font-size:12px;padding:7px 14px;">📸 Take Snapshot</button>
+        </div>
+        <table class="risk-table">
+          <thead><tr><th>Snapshot Date</th><th>Total Risks</th><th>Avg Inherit</th><th>Avg Current</th><th>Avg Target</th><th>Taken By</th></tr></thead>
+          <tbody>
+            <tr><td>Mar 1, 2026</td><td>164</td><td><span class="pill severe">18.4</span></td><td><span class="pill high">12.1</span></td><td><span class="pill low">3.2</span></td><td>Admin</td></tr>
+            <tr><td>Feb 1, 2026</td><td>158</td><td><span class="pill severe">19.1</span></td><td><span class="pill high">13.8</span></td><td><span class="pill low">3.5</span></td><td>Admin</td></tr>
+            <tr><td>Jan 1, 2026</td><td>151</td><td><span class="pill severe">20.0</span></td><td><span class="pill severe">16.2</span></td><td><span class="pill medium">5.1</span></td><td>Admin</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:11px;color:var(--muted);margin-top:12px;font-style:italic;">
+          💡 MySQL table: <code style="background:#1e2730;padding:2px 6px;border-radius:4px;">snapshots</code> — snapshots are auto-generated when you run a full site scan.
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    function switchTab(e, tabId) {
+      e.preventDefault();
+      document.querySelectorAll('.rnav-tab').forEach(t => t.classList.remove('active'));
+      e.target.classList.add('active');
+      document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+      document.getElementById('tab-' + tabId).style.display = 'flex';
+      document.getElementById('tab-' + tabId).style.flexDirection = 'column';
+    }
+
+    function toggleBtn(btn) {
+      btn.closest('.toggle-group').querySelectorAll('.tgl-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // Show dashboard tab by default
+    document.getElementById('tab-dashboard').style.display = 'flex';
+    document.getElementById('tab-dashboard').style.flexDirection = 'column';
+  </script>
+</body>
+</html>

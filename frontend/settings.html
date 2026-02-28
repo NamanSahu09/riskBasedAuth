@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecureCheck – Settings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── SETTINGS LAYOUT ── */
+    .settings-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0;
+      flex: 1;
+    }
+
+    /* Settings sidebar nav */
+    .settings-nav {
+      border-right: 1px solid var(--border);
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      background: var(--bg);
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+
+    .snav-section {
+      font-size: 10px; font-weight: 600;
+      color: var(--muted); letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 10px 10px 4px;
+    }
+
+    .snav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 7px;
+      cursor: pointer; color: var(--muted);
+      font-size: 13px; font-weight: 500;
+      text-decoration: none;
+      transition: all .15s;
+    }
+
+    .snav-item:hover { background: #161b22; color: var(--text); }
+    .snav-item.active { background: #161b22; color: var(--text); }
+    .snav-item.active .snav-dot { background: var(--cyan); }
+
+    .snav-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--muted); flex-shrink: 0;
+      transition: background .15s;
+    }
+
+    /* Settings main area */
+    .settings-main {
+      padding: 28px 32px;
+      display: flex; flex-direction: column; gap: 24px;
+      overflow-y: auto;
+    }
+
+    .settings-section {
+      display: none;
+    }
+
+    .settings-section.active {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .settings-header {
+      display: flex; flex-direction: column; gap: 4px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .settings-header h2 { font-size: 20px; font-weight: 800; letter-spacing: -.4px; }
+    .settings-header p  { font-size: 13px; color: var(--muted); }
+
+    /* Setting card */
+    .set-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .set-card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px;
+    }
+
+    .set-card-title {
+      font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .set-card-body {
+      padding: 20px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    /* Form rows */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-row.single { grid-template-columns: 1fr; }
+    .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+
+    .field {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+
+    .field label {
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+
+    /* Status indicator */
+    .conn-status {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      border-radius: 8px; font-size: 13px; font-weight: 500;
+    }
+
+    .conn-status.connected    { background: rgba(63,185,80,.1); color: var(--green); border: 1px solid rgba(63,185,80,.25); }
+    .conn-status.disconnected { background: rgba(248,81,73,.08); color: var(--red); border: 1px solid rgba(248,81,73,.2); }
+    .conn-status.testing      { background: rgba(34,211,238,.08); color: var(--cyan); border: 1px solid rgba(34,211,238,.2); }
+
+    .conn-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    .conn-status.connected    .conn-dot { background: var(--green); box-shadow: 0 0 6px rgba(63,185,80,.6); }
+    .conn-status.disconnected .conn-dot { background: var(--red); }
+    .conn-status.testing      .conn-dot { background: var(--cyan); animation: glow-pulse 1s infinite; }
+
+    /* Toggle switch */
+    .toggle-switch {
+      position: relative; display: inline-flex; align-items: center;
+      width: 44px; height: 24px; cursor: pointer;
+    }
+
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+
+    .toggle-track {
+      display: flex; align-items: center;
+      width: 44px; height: 24px; border-radius: 12px;
+      background: #30363d; transition: background .2s;
+      position: relative;
+    }
+
+    .toggle-switch input:checked ~ .toggle-track { background: var(--cyan); }
+
+    .toggle-thumb {
+      position: absolute; left: 3px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; transition: left .2s; box-shadow: 0 1px 4px rgba(0,0,0,.3);
+    }
+
+    .toggle-switch input:checked ~ .toggle-track .toggle-thumb { left: 23px; }
+
+    /* Notification row */
+    .notif-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid rgba(30,39,48,.6);
+      gap: 12px;
+    }
+
+    .notif-row:last-child { border-bottom: none; }
+
+    .notif-info h4  { font-size: 14px; font-weight: 600; }
+    .notif-info p   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* Model config card */
+    .model-option {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px;
+      border: 1px solid var(--border); border-radius: 10px;
+      cursor: pointer; transition: all .15s;
+      position: relative;
+    }
+
+    .model-option:hover { border-color: #30363d; background: #161b22; }
+    .model-option.selected { border-color: var(--cyan); background: rgba(34,211,238,.04); }
+
+    .model-radio {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--border); display: flex;
+      align-items: center; justify-content: center;
+      flex-shrink: 0; transition: border-color .15s;
+    }
+
+    .model-option.selected .model-radio { border-color: var(--cyan); }
+
+    .model-radio::after {
+      content: ''; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--cyan); display: none;
+    }
+
+    .model-option.selected .model-radio::after { display: block; }
+
+    .model-icon { font-size: 24px; flex-shrink: 0; }
+    .model-name { font-size: 14px; font-weight: 700; }
+    .model-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .model-badge {
+      margin-left: auto;
+      font-size: 10px; font-weight: 700; padding: 3px 8px;
+      border-radius: 20px; letter-spacing: .5px;
+    }
+
+    .model-badge.active { background: rgba(34,211,238,.1); color: var(--cyan); border: 1px solid rgba(34,211,238,.2); }
+    .model-badge.beta   { background: rgba(245,158,11,.1); color: var(--yellow); border: 1px solid rgba(245,158,11,.2); }
+
+    /* Power BI placeholder in settings */
+    .pbi-config-slot {
+      background: #0a0f1a; border: 1px dashed #1e3050;
+      border-radius: 8px; padding: 20px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .pbi-config-slot .pbi-label {
+      font-size: 11px; color: var(--muted); font-family: 'Inter', monospace;
+    }
+
+    .pbi-config-slot .pbi-label strong { color: var(--cyan); display: block; margin-bottom: 2px; }
+
+    /* Action bar */
+    .action-bar {
+      display: flex; gap: 10px; align-items: center;
+      padding-top: 4px;
+    }
+
+    .save-indicator {
+      font-size: 12px; color: var(--green);
+      opacity: 0; transition: opacity .3s;
+    }
+
+    .save-indicator.show { opacity: 1; }
+
+    @media (max-width: 900px) {
+      .settings-layout { grid-template-columns: 1fr; }
+      .settings-nav {
+        position: static; height: auto;
+        flex-direction: row; overflow-x: auto; padding: 10px 12px;
+        border-right: none; border-bottom: 1px solid var(--border);
+      }
+      .snav-section { display: none; }
+      .settings-main { padding: 20px; }
+      .form-row.triple { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .form-row.triple { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-area"><div class="logo-icon">🛡️</div><span class="nav-label logo-name">SecureCheck</span></div>
+    <nav class="nav">
+      <a href="index.html"     class="nav-item" title="Dashboard"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m5-8l2 2"/></svg><span class="nav-label">Dashboard</span></a>
+      <a href="check.html"    class="nav-item" title="Check Website"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg><span class="nav-label">Check Website</span></a>
+      <a href="history.html"  class="nav-item" title="Scan History"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg><span class="nav-label">Scan History</span></a>
+      <a href="threats.html"  class="nav-item" title="Threats"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><span class="nav-label">Threats</span></a>
+      <a href="ssl.html"      class="nav-item" title="SSL / TLS"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" d="M7 11V7a5 5 0 0110 0v4"/></svg><span class="nav-label">SSL / TLS</span></a>
+      <a href="dns.html"      class="nav-item" title="DNS Lookup"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg><span class="nav-label">DNS Lookup</span></a>
+      <a href="reports.html"  class="nav-item" title="Reports"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"/></svg><span class="nav-label">Reports</span></a>
+      <a href="analytics.html" class="nav-item" title="Analytics"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span class="nav-label">Analytics</span></a>
+      <a href="settings.html" class="nav-item active" title="Settings"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg><span class="nav-label">Settings</span></a>
+    </nav>
+    <div class="sidebar-bottom"><button class="collapse-btn" id="collapseBtn" title="Collapse"><svg class="collapse-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg><span class="nav-label">Collapse</span></button></div>
+  </aside>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main class="main" id="mainContent">
+
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1>Settings</h1>
+        <p>Configure database, AI model, Power BI and notifications</p>
+      </div>
+      <div class="status-pill"><div class="status-dot"></div>All systems operational</div>
+    </div>
+
+    <div class="settings-layout">
+
+      <!-- ── SETTINGS NAV ── -->
+      <div class="settings-nav">
+        <div class="snav-section">General</div>
+        <a href="#" class="snav-item active" onclick="showSection(event,'general')"><div class="snav-dot"></div>General</a>
+        <a href="#" class="snav-item" onclick="showSection(event,'profile')"><div class="snav-dot"></div>Profile</a>
+
+        <div class="snav-section">Integrations</div>
+        <a href="#" class="snav-item" onclick="showSection(event,'mysql')"><div class="snav-dot"></div>MySQL Database</a>
+        <a href="#" class="snav-item" onclick="showSection(event,'powerbi')"><div class="snav-dot"></div>Power BI</a>
+        <a href="#" class="snav-item" onclick="showSection(event,'aimodel')"><div class="snav-dot"></div>AI / ML Model</a>
+
+        <div class="snav-section">Security</div>
+        <a href="#" class="snav-item" onclick="showSection(event,'scanner')"><div class="snav-dot"></div>Scanner Config</a>
+        <a href="#" class="snav-item" onclick="showSection(event,'notifications')"><div class="snav-dot"></div>Notifications</a>
+
+        <div class="snav-section">System</div>
+        <a href="#" class="snav-item" onclick="showSection(event,'api')"><div class="snav-dot"></div>API Keys</a>
+        <a href="#" class="snav-item" onclick="showSection(event,'logs')"><div class="snav-dot"></div>Audit Logs</a>
+      </div>
+
+      <!-- ── SETTINGS CONTENT ── -->
+      <div class="settings-main">
+
+        <!-- ══ GENERAL ══ -->
+        <div id="sec-general" class="settings-section active">
+          <div class="settings-header">
+            <h2>⚙️ General Settings</h2>
+            <p>Basic configuration for your SecureCheck platform</p>
+          </div>
+
+          <div class="set-card">
+            <div class="set-card-header"><div class="set-card-title">🏢 Site Information</div></div>
+            <div class="set-card-body">
+              <div class="form-row">
+                <div class="field"><label>Platform Name</label><input class="input-field" type="text" value="SecureCheck"></div>
+                <div class="field"><label>Organization</label><input class="input-field" type="text" placeholder="Your Company Name"></div>
+              </div>
+              <div class="form-row">
+                <div class="field"><label>Admin Email</label><input class="input-field" type="email" placeholder="admin@company.com"></div>
+                <div class="field"><label>Timezone</label>
+                  <select class="input-field">
+                    <option>UTC+05:30 (India Standard Time)</option>
+                    <option>UTC+00:00 (GMT)</option>
+                    <option>UTC-05:00 (EST)</option>
+                    <option>UTC+01:00 (CET)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row single">
+                <div class="field"><label>Platform URL</label><input class="input-field" type="url" placeholder="https://yourdomain.com"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="set-card">
+            <div class="set-card-header"><div class="set-card-title">🎨 Appearance</div></div>
+            <div class="set-card-body">
+              <div class="form-row">
+                <div class="field"><label>Theme</label>
+                  <select class="input-field">
+                    <option selected>Dark (Default)</option>
+                    <option>Light</option>
+                    <option>System</option>
+                  </select>
+                </div>
+                <div class="field"><label>Language</label>
+                  <select class="input-field">
+                    <option>English</option>
+                    <option>Hindi</option>
+                    <option>French</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn btn-primary" onclick="saveSettings(this)">💾 Save Changes</button>
+            <button class="btn btn-ghost">↩ Reset</button>
+            <span class="save-indicator" id="saveInd">✅ Saved successfully!</span>
+          </div>
+        </div>
+
+        <!-- ══ MYSQL ══ -->
+        <div id="sec-mysql" class="settings-section">
+          <div class="settings-header">
+            <h2>🗄️ MySQL Database</h2>
+            <p>Connect your MySQL database to power dynamic risk data and scan results</p>
+          </div>
+
+          <div id="dbStatus" class="conn-status disconnected" style="margin-bottom:4px;">
+            <div class="conn-dot"></div>
+            <span>Not connected — configure credentials below and test connection</span>
+          </div>
+
+          <div class="set-card">
+            <div class="set-card-header">
+              <div class="set-card-title">🔌 Connection Settings</div>
+              <button class="btn btn-ghost" style="font-size:12px;padding:6px 14px;" onclick="testDB()">🔄 Test Connection</button>
+            </div>
+            <div class="set-card-body">
+              <div class="form-row triple">
+                <div class="field"><label>Host</label><input class="input-field" id="dbHost" type="text" placeholder="localhost" value="localhost"></div>
+                <div class="field"><label>Port</label><input class="input-field" id="dbPort" type="number" placeholder="3306" value="3306"></div>
+                <div class="field"><label>Database Name</label><input class="input-field" id="dbName" type="text" placeholder="securecheck_db"></div>
+              </div>
+              <div class="form-row">
+                <div class="field"><label>Username</label><input class="input-field" id="dbUser" type="text" placeholder="root"></div>
+                <div class="field"><label>Password</label><input class="input-field" id="dbPass" type="password" placeholder="••••••••"></div>
+              </div>
+              <div class="form-row single">
+                <div class="field"><label>PHP API Endpoint (your backend)</label><input class="input-field" type="url" placeholder="https://yoursite.com/api/db.php" value="http://localhost/securecheck/api/db.php"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="set-card">
+            <div class="set-card-header"><div class="set-card-title">📋 Expected MySQL Tables</div></div>
+            <div class="set-card-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div style="background:#0a0f1a;border:1px solid var(--border);border-radius:8px;padding:12px;">
+                  <div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:6px;font-family:monospace;">risks</div>
+                  <div style="font-size:11px;color:var(--muted);line-height:1.8;font-family:monospace;">id, name, category, inherent_risk,<br>current_risk, target_risk, status,<br>created_at, updated_at</div>
+                </div>
+                <div style="background:#0a0f1a;border:1px solid var(--border);border-radius:8px;padding:12px;">
+                  <div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:6px;font-family:monospace;">scan_results</div>
+                  <div style="font-size:11px;color:var(--muted);line-height:1.8;font-family:monospace;">id, url, score, status,<br>ssl_valid, dns_ok, headers_ok,<br>malware_detected, scanned_at</div>
+                </div>
+                <div style="background:#0a0f1a;border:1px solid var(--border);border-radius:8px;padding:12px;">
+                  <div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:6px;font-family:monospace;">snapshots</div>
+                  <div style="font-size:11px;color:var(--muted);line-height:1.8;font-family:monospace;">id, taken_at, total_risks,<br>avg_inherent, avg_current,<br>avg_target, taken_by</div>
+                </div>
+                <div style="background:#0a0f1a;border:1px solid var(--border);border-radius:8px;padding:12px;">
+                  <div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:6px;font-family:monospace;">threats</div>
+                  <div style="font-size:11px;color:var(--muted);line-height:1.8;font-family:monospace;">id, type, site, severity,<br>description, detected_at,<br>resolved, resolved_at</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn btn-primary" onclick="saveSettings(this)">💾 Save DB Config</button>
+            <span class="save-indicator" id="dbSaveInd">✅ Saved!</span>
+          </div>
+        </div>
+
+        <!-- ══ POWER BI ══ -->
+        <div id="sec-powerbi" class="settings-section">
+          <div class="settings-header">
+            <h2>📊 Power BI Integration</h2>
+            <p>Paste your Power BI embed URLs to populate the report dashboard charts</p>
+          </div>
+
+          <div class="set-card">
+            <div class="set-card-header"><div class="set-card-title">🔗 Embed Configuration</div></div>
+            <div class="set-card-body">
+              <div class="form-row single">
+                <div class="field"><label>Workspace ID</label><input class="input-field" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
+              </div>
+              <div class="form-row single">
+                <div class="field"><label>Report ID</label><input class="input-field" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
+              </div>
+              <div class="form-row single">
+                <div class="field"><label>Access Token (from your PHP backend)</label><input class="input-field" type="text" placeholder="eyJ0eXAiOiJKV1Qi..."></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="set-card">
+            <div class="set-card-header"><div class="set-card-title">📌 Chart Embed URLs</div></div>
+            <div class="set-card-body">
+              <div class="field"><label>Overall Risk Donut</label>
+                <div class="pbi-config-slot">
+                  <div class="pbi-label"><strong>Power BI Embed iframe</strong>Paste your &lt;iframe&gt; embed code or embed URL here for the Overall Risk chart</div>
+                  <textarea class="input-field" rows="2" placeholder='<iframe src="https://app.powerbi.com/reportEmbed?reportId=..." frameborder="0" ...></iframe>' style="resize:vertical;font-family:monospace;font-size:11px;"></textarea>
+                </div>
+              </div>
+              <div class="field"><label>Risk Heat Map</label>
+                <div class="pbi-config-slot">
+                  <div class="pbi-label"><strong>Power BI Embed iframe</strong>Risk Heat Map chart embed</div>
+                  <textarea class="input-field" rows="2" placeholder='<iframe src="https://app.powerbi.com/reportEmbed?..." ...></iframe>' style="resize:vertical;font-family:monospace;font-size:11px;"></textarea>
+                </div>
+              </div>
+              <div class="field"><label>Risk Trend Line Chart</label>
+                <div class="pbi-config-slot">
+                  <div class="pbi-label"><strong>Power BI Embed iframe</strong>Weekly/Monthly risk trend chart</div>
+                  <textarea class="input-field" rows="2" placeholder='<iframe src="https://app.powerbi.com/reportEmbed?..." ...></iframe>' style="resize:vertical;font-family:monospace;font-size:11px;"></textarea>
+                </div>
+              </div>
+              <div class="field"><label>Snapshot History</label>
+                <div class="pbi-config-slot">
+                  <div class="pbi-label"><strong>Power BI Embed iframe</strong>Snapshot history multi-line chart</div>
+                  <textarea class="input-field" rows="2" placeholder='<iframe src="https://app.powerbi.com/reportEmbed?..." ...></iframe>' style="resize:vertical;font-family:monospace;font-size:11px;"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn btn-primary" onclick="saveSettings(this)">💾 Save Power BI Config</button>
+            <span class="save-indicator">✅ Saved!</span>
+          </div>
+        </div>
+
+        <!-- ══ AI MODEL ══ -->
+        <div id="sec-aimodel" class="settings-section">
+          <div class="settings-header">
+            <h2>🤖 AI / ML Model</h2>
+            <p>Configure the machine learning model used for website security prediction and risk scoring</p>
+          </div>
+
+          <div class="set-card">
+            <div class="set-card-header"><div class="set-card-title">🧠 Select Model</div></div>
+            <div class="set-card-body">
+              <div style="display:flex;flex-direction:column;gap:10px;">
+
+                <div class="model-option selected" onclick="selectModel(this)">
+                  <div class="model-radio"></div>
+                  <div class="model-icon">🔐</div>
+                  <div>
+                    <div class="model-name">SecureCheck Custom Model</div>
+                    <div class="model-desc">Your trained ML model (Python/scikit-learn) — loaded via PHP API endpoint</div>
+                  </div>
+                  <span class="model-badge active">ACTIVE</span>
+                </div>
+
+                <div class="model-option" onclick="selectModel(this)">
+                  <div class="model-radio"></div>
+                  <div class="model-icon">🌐</div>
+                  <div>
+                    <div class="model-name">VirusTotal API</div>
+                    <div class="model-desc">Third-party malware & threat intelligence API for URL scanning</div>
+                  </div>
+                  <span class="model-badge beta">OPTIONAL</span>
+                </div>
+
+                <div class="model-option" onclick="selectModel(this)">
+                  <div class="model-radio"></div>
+                  <div class="model-icon">🤖</div>
+                  <div>
+                    <div class="model-name">Hugging Face Model</div>
+                    <div class="model-desc">Transformer-based URL classification model via HF Inference API</div>
+                  </div>
+                  <span class="model-badge beta">BETA</span>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="set-card">
+            <div class="set-card-header"><div class="set-card-title">⚙️ Model Configuration</div></div>
+            <div class="set-card-body">
+              <div class="form-row single">
+                <div class="field"><label>Model API Endpoint (your PHP/Python backend)</label>
+                  <input class="input-field" type="url" placeholder="http://localhost/securecheck/api/predict.php" value="http://localhost/securecheck/api/predict.php">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="field"><label>API Key / Token</label>
+                  <input class="input-field" type="password" placeholder="Your model API key">
+                </div>
+                <div class="field"><label>Confidence Threshold (%)</label>
+                  <input class="input-field" type="number" min="0" max="100" value="75" placeholder="75">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="field"><label>Model Version</label>
+                  <input class="input-field" type="text" placeholder="v1.0.0" value="v1.0.0">
+                </div>
+                <div class="field"><label>Request Timeout (seconds)</label>
+                  <input class="input-field" type="number" value="10">
+                </div>
+              </div>
+              <div class="form-row single">
+                <div class="field"><label>Model File Path (server)</label>
+                  <input class="input-field" type="text" placeholder="/var/www/html/models/securecheck_model.pkl">
+                </div>
+              </div>
+              <div style="background:#0a0f1a;border:1px solid var(--border);border-radius:8px;padding:14px;">
+                <div style="font-size:11px;font-weight:600;color:var(--cyan);margin-bottom:8px;letter-spacing:.5px;">📝 PHP Integration Example</div>
+                <code style="font-size:11px;color:#a5f3fc;line-height:1.8;white-space:pre;">// In your PHP scan handler (scan.php):
+$modelUrl = 'http://localhost:5000/predict';
+$data = ['url' => $targetUrl, 'features' => $extractedFeatures];
+$response = json_decode(file_get_contents(
+  $modelUrl . '?' . http_build_query($data)
+));
+$riskScore = $response->score; // 0-100
+$prediction = $response->label; // secure/danger/moderate</code>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn btn-primary" onclick="saveSettings(this)">💾 Save Model Config</button>
+            <button class="btn btn-ghost" onclick="testModel()">🧪 Test Model</button>
+            <span class="save-indicator" id="modelSaveInd">✅ Saved!</span>
+          </div>
+        </div>
+
+        <!-- ══ SCANNER CONFIG ══ -->
+        <div id="sec-scanner" class="settings-section">
+          <div class="settings-header">
+            <h2>🔍 Scanner Configuration</h2>
+            <p>Control how the security scanner behaves for each URL scan</p>
+          </div>
+
+          <div class="set-card">
+            <div class="set-card-header"><div class="set-card-title">⚡ Scan Settings</div></div>
+            <div class="set-card-body">
+              <div class="form-row triple">
+                <div class="field"><label>Scan Timeout (sec)</label><input class="input-field" type="number" value="30"></div>
+                <div class="field"><label>Max Concurrent Scans</label><input class="input-field" type="number" value="5"></div>
+                <div class="field"><label>Retry Count</label><input class="input-field" type="number" value="3"></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:0;">
+                <div class="notif-row"><div class="notif-info"><h4>SSL Certificate Check</h4><p>Validate SSL expiry and issuer</p></div><label class="toggle-switch"><input type="checkbox" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+                <div class="notif-row"><div class="notif-info"><h4>HTTP Security Headers</h4><p>Check for X-Frame-Options, CSP, HSTS etc.</p></div><label class="toggle-switch"><input type="checkbox" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+                <div class="notif-row"><div class="notif-info"><h4>DNS Validation</h4><p>Verify DNS configuration and SPF/DMARC</p></div><label class="toggle-switch"><input type="checkbox" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+                <div class="notif-row"><div class="notif-info"><h4>Malware / Blacklist Scan</h4><p>Check against malware and phishing databases</p></div><label class="toggle-switch"><input type="checkbox" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+                <div class="notif-row"><div class="notif-info"><h4>AI Risk Prediction</h4><p>Use your ML model for advanced risk scoring</p></div><label class="toggle-switch"><input type="checkbox" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+                <div class="notif-row"><div class="notif-info"><h4>Auto-save to MySQL</h4><p>Save every scan result to the database</p></div><label class="toggle-switch"><input type="checkbox" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn btn-primary" onclick="saveSettings(this)">💾 Save Scanner Config</button>
+            <span class="save-indicator">✅ Saved!</span>
+          </div>
+        </div>
+
+        <!-- ══ NOTIFICATIONS ══ -->
+        <div id="sec-notifications" class="settings-section">
+          <div class="settings-header">
+            <h2>🔔 Notifications</h2>
+            <p>Configure when and how you receive security alerts</p>
+          </div>
+
+          <div class="set-card">
+            <div class="set-card-header"><div class="set-card-title">📧 Email Alerts</div></div>
+            <div class="set-card-body">
+              <div class="form-row">
+                <div class="field"><label>Alert Email</label><input class="input-field" type="email" placeholder="alerts@company.com"></div>
+                <div class="field"><label>CC Email (optional)</label><input class="input-field" type="email" placeholder="team@company.com"></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:0;">
+                <div class="notif-row"><div class="notif-info"><h4>Critical Threat Detected</h4><p>Immediately alert when malware or phishing is found</p></div><label class="toggle-switch"><input type="checkbox" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+                <div class="notif-row"><div class="notif-info"><h4>SSL Certificate Expiring</h4><p>Alert 30 days before SSL expires</p></div><label class="toggle-switch"><input type="checkbox" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+                <div class="notif-row"><div class="notif-info"><h4>High Risk Score (>80)</h4><p>Alert when a scan returns a very high risk score</p></div><label class="toggle-switch"><input type="checkbox" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+                <div class="notif-row"><div class="notif-info"><h4>Weekly Report Digest</h4><p>Weekly summary email of all scan activity</p></div><label class="toggle-switch"><input type="checkbox"><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+                <div class="notif-row"><div class="notif-info"><h4>MySQL Connection Lost</h4><p>Alert when database connection drops</p></div><label class="toggle-switch"><input type="checkbox" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn btn-primary" onclick="saveSettings(this)">💾 Save Notification Settings</button>
+            <span class="save-indicator">✅ Saved!</span>
+          </div>
+        </div>
+
+        <!-- ══ API KEYS ══ -->
+        <div id="sec-api" class="settings-section">
+          <div class="settings-header">
+            <h2>🔑 API Keys</h2>
+            <p>Manage third-party API integrations for enhanced scanning</p>
+          </div>
+
+          <div class="set-card">
+            <div class="set-card-header"><div class="set-card-title">🌐 External Service Keys</div></div>
+            <div class="set-card-body">
+              <div class="field"><label>VirusTotal API Key</label><div style="display:flex;gap:8px;"><input class="input-field" type="password" placeholder="Your VirusTotal API key" style="flex:1;"><button class="btn btn-ghost" style="font-size:12px;white-space:nowrap;">Show</button></div></div>
+              <div class="field"><label>Google Safe Browsing API</label><div style="display:flex;gap:8px;"><input class="input-field" type="password" placeholder="AIza..." style="flex:1;"><button class="btn btn-ghost" style="font-size:12px;white-space:nowrap;">Show</button></div></div>
+              <div class="field"><label>Shodan API Key</label><div style="display:flex;gap:8px;"><input class="input-field" type="password" placeholder="Your Shodan API key" style="flex:1;"><button class="btn btn-ghost" style="font-size:12px;white-space:nowrap;">Show</button></div></div>
+              <div class="field"><label>Power BI Client Secret</label><div style="display:flex;gap:8px;"><input class="input-field" type="password" placeholder="Azure AD client secret" style="flex:1;"><button class="btn btn-ghost" style="font-size:12px;white-space:nowrap;">Show</button></div></div>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn btn-primary" onclick="saveSettings(this)">💾 Save API Keys</button>
+            <span class="save-indicator">✅ Saved!</span>
+          </div>
+        </div>
+
+        <!-- ══ AUDIT LOGS ══ -->
+        <div id="sec-logs" class="settings-section">
+          <div class="settings-header">
+            <h2>📋 Audit Logs</h2>
+            <p>Track all system changes and user actions</p>
+          </div>
+          <div class="set-card">
+            <div class="set-card-header"><div class="set-card-title">Recent Activity</div></div>
+            <div class="set-card-body" style="padding:0;">
+              <table class="risk-table" style="font-size:13px;">
+                <thead><tr><th>Action</th><th>User</th><th>IP</th><th>Time</th></tr></thead>
+                <tbody>
+                  <tr><td>Settings saved (MySQL config)</td><td>Admin</td><td>192.168.1.1</td><td style="color:var(--muted)">2 min ago</td></tr>
+                  <tr><td>Scan run: https://google.com</td><td>Admin</td><td>192.168.1.1</td><td style="color:var(--muted)">15 min ago</td></tr>
+                  <tr><td>AI model updated to v1.0.0</td><td>Admin</td><td>192.168.1.1</td><td style="color:var(--muted)">1 hr ago</td></tr>
+                  <tr><td>Power BI embed URL saved</td><td>Admin</td><td>192.168.1.1</td><td style="color:var(--muted)">3 hr ago</td></tr>
+                  <tr><td>User login</td><td>Admin</td><td>192.168.1.1</td><td style="color:var(--muted)">Today 09:12</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ PROFILE ══ -->
+        <div id="sec-profile" class="settings-section">
+          <div class="settings-header"><h2>👤 Profile</h2><p>Manage your account details and password</p></div>
+          <div class="set-card">
+            <div class="set-card-header"><div class="set-card-title">Account Info</div></div>
+            <div class="set-card-body">
+              <div class="form-row">
+                <div class="field"><label>Full Name</label><input class="input-field" type="text" placeholder="Your Name"></div>
+                <div class="field"><label>Email</label><input class="input-field" type="email" placeholder="admin@company.com"></div>
+              </div>
+              <div class="form-row">
+                <div class="field"><label>New Password</label><input class="input-field" type="password" placeholder="••••••••"></div>
+                <div class="field"><label>Confirm Password</label><input class="input-field" type="password" placeholder="••••••••"></div>
+              </div>
+            </div>
+          </div>
+          <div class="action-bar">
+            <button class="btn btn-primary" onclick="saveSettings(this)">💾 Update Profile</button>
+            <span class="save-indicator">✅ Updated!</span>
+          </div>
+        </div>
+
+      </div><!-- /settings-main -->
+    </div><!-- /settings-layout -->
+
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    function showSection(e, id) {
+      e.preventDefault();
+      document.querySelectorAll('.snav-item').forEach(i => i.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('sec-' + id).classList.add('active');
+    }
+
+    function saveSettings(btn) {
+      const orig = btn.textContent;
+      btn.textContent = '⏳ Saving...';
+      btn.disabled = true;
+      const ind = btn.parentElement.querySelector('.save-indicator');
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.disabled = false;
+        if (ind) { ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 3000); }
+      }, 900);
+    }
+
+    function testDB() {
+      const el = document.getElementById('dbStatus');
+      el.className = 'conn-status testing';
+      el.innerHTML = '<div class="conn-dot"></div><span>Testing connection...</span>';
+      setTimeout(() => {
+        // Simulate success — replace with real PHP fetch
+        el.className = 'conn-status connected';
+        el.innerHTML = '<div class="conn-dot"></div><span>✅ Connected to MySQL — localhost:3306/securecheck_db</span>';
+      }, 1800);
+    }
+
+    function testModel() {
+      const btn = event.currentTarget;
+      const orig = btn.textContent;
+      btn.textContent = '⏳ Testing...';
+      btn.disabled = true;
+      setTimeout(() => {
+        btn.textContent = '✅ Model Responding';
+        setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2500);
+      }, 1500);
+    }
+
+    function selectModel(el) {
+      document.querySelectorAll('.model-option').forEach(m => m.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    // Toggle password visibility
+    document.querySelectorAll('.btn-ghost').forEach(btn => {
+      if (btn.textContent === 'Show') {
+        btn.addEventListener('click', function() {
+          const inp = this.previousElementSibling;
+          if (!inp) return;
+          if (inp.type === 'password') { inp.type = 'text'; this.textContent = 'Hide'; }
+          else { inp.type = 'password'; this.textContent = 'Show'; }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
