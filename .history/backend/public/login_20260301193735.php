@@ -119,12 +119,6 @@ INSERT INTO login_history
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ");
 
-// echo "Device: $device_type <br>";
-// echo "Country: $country <br>";
-// echo "Risk Score: $risk_score <br>";
-// echo "Risk Level: $risk_level <br>";
-// echo "Https / http:  $https_status <br>";
-// exit();
 $stmt_insert->bind_param(
     "issssiiisiis",
     $user_id,
@@ -155,9 +149,7 @@ if ($risk_level === "HIGH") {
     echo "Access temporarily restricted.";
     exit();
 
-} 
-elseif ($risk_level === "MEDIUM") 
-{
+} elseif ($risk_level === "MEDIUM") {
 
     // Generate OTP
     $_SESSION["temp_user_id"] = $user_id;
@@ -166,13 +158,11 @@ elseif ($risk_level === "MEDIUM")
 
     $otp = rand(100000, 999999);
     $_SESSION["otp"] = $otp;
-    $_SESSION["otp_expiry"] = time() + 300; // 5 min expiry 
-    header("Location: otp_verify.php");
+
+    echo "<h3>Medium Risk Login</h3>";
+    echo "OTP Generated (Simulation): <b>$otp</b><br>";
+    echo "<a href='otp_verify.php'>Verify OTP</a>";
     exit();
-    //echo "<h3>Medium Risk Login</h3>";
-    //echo "OTP Generated (Simulation): <b>$otp</b><br>";
-    //echo "<a href='otp_verify.php'>Verify OTP</a>";
-    //exit();
 
 } 
   else 

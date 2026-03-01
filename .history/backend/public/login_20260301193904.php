@@ -119,12 +119,6 @@ INSERT INTO login_history
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ");
 
-// echo "Device: $device_type <br>";
-// echo "Country: $country <br>";
-// echo "Risk Score: $risk_score <br>";
-// echo "Risk Level: $risk_level <br>";
-// echo "Https / http:  $https_status <br>";
-// exit();
 $stmt_insert->bind_param(
     "issssiiisiis",
     $user_id,
@@ -171,8 +165,8 @@ elseif ($risk_level === "MEDIUM")
     exit();
     //echo "<h3>Medium Risk Login</h3>";
     //echo "OTP Generated (Simulation): <b>$otp</b><br>";
-    //echo "<a href='otp_verify.php'>Verify OTP</a>";
-    //exit();
+    echo "<a href='otp_verify.php'>Verify OTP</a>";
+    exit();
 
 } 
   else 

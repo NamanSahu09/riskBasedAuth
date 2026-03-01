@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once "../config/database.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
@@ -119,12 +118,6 @@ INSERT INTO login_history
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ");
 
-// echo "Device: $device_type <br>";
-// echo "Country: $country <br>";
-// echo "Risk Score: $risk_score <br>";
-// echo "Risk Level: $risk_level <br>";
-// echo "Https / http:  $https_status <br>";
-// exit();
 $stmt_insert->bind_param(
     "issssiiisiis",
     $user_id,
@@ -149,42 +142,19 @@ if (!$stmt_insert->execute()) {
    ADAPTIVE RESPONSE
 ========================= */
 
+echo "<h3>Login Successful</h3>";
+echo "Risk Score: $risk_score <br>";
+echo "Risk Level: $risk_level <br>";
+echo "Country: $country <br><br>";
+
 if ($risk_level === "HIGH") {
-
-    echo "<h3 style='color:red;'>⚠ High Risk Login Detected!</h3>";
-    echo "Access temporarily restricted.";
-    exit();
-
-} 
-elseif ($risk_level === "MEDIUM") 
-{
-
-    // Generate OTP
-    $_SESSION["temp_user_id"] = $user_id;
-    $_SESSION["temp_username"] = $username;
-    $_SESSION["temp_risk_level"] = $risk_level;
-
-    $otp = rand(100000, 999999);
-    $_SESSION["otp"] = $otp;
-    $_SESSION["otp_expiry"] = time() + 300; // 5 min expiry 
-    header("Location: otp_verify.php");
-    exit();
-    //echo "<h3>Medium Risk Login</h3>";
-    //echo "OTP Generated (Simulation): <b>$otp</b><br>";
-    //echo "<a href='otp_verify.php'>Verify OTP</a>";
-    //exit();
-
-} 
-  else 
-  {
-
-    // LOW RISK → direct login
-    $_SESSION["user_id"] = $user_id;
-    $_SESSION["username"] = $username;
-    $_SESSION["risk_level"] = $risk_level;
-
-    header("Location: dashboard.php");
-    exit();
+    echo "<b style='color:red;'>⚠ High Risk Login Detected!</b><br>";
+    echo "Access temporarily restricted. Additional verification required.";
+} elseif ($risk_level === "MEDIUM") {
+    echo "<b style='color:orange;'>⚠ Medium Risk Login</b><br>";
+    echo "OTP verification required.";
+} else {
+    echo "<b style='color:green;'>Login Approved (Low Risk)</b>";
 }
 
 ?>

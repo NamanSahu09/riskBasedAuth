@@ -119,12 +119,6 @@ INSERT INTO login_history
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ");
 
-// echo "Device: $device_type <br>";
-// echo "Country: $country <br>";
-// echo "Risk Score: $risk_score <br>";
-// echo "Risk Level: $risk_level <br>";
-// echo "Https / http:  $https_status <br>";
-// exit();
 $stmt_insert->bind_param(
     "issssiiisiis",
     $user_id,
