@@ -40,7 +40,7 @@ $user_id = $user["id"];
 
 $ip = $_SERVER['REMOTE_ADDR'];
 // For testing location manually:
-// $ip = "8.8.8.8";
+ $ip = "8.8.8.8";
 
 $user_agent = $_SERVER['HTTP_USER_AGENT'];
 $login_time = date("Y-m-d H:i:s");

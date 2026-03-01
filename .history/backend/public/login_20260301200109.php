@@ -38,9 +38,9 @@ $user_id = $user["id"];
    BEHAVIOUR CAPTURE
 ========================= */
 
-$ip = $_SERVER['REMOTE_ADDR'];
+//$ip = $_SERVER['REMOTE_ADDR'];
 // For testing location manually:
-// $ip = "8.8.8.8";
+ $ip = "8.8.8.8";
 
 $user_agent = $_SERVER['HTTP_USER_AGENT'];
 $login_time = date("Y-m-d H:i:s");
@@ -119,12 +119,12 @@ INSERT INTO login_history
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ");
 
-// echo "Device: $device_type <br>";
-// echo "Country: $country <br>";
-// echo "Risk Score: $risk_score <br>";
-// echo "Risk Level: $risk_level <br>";
-// echo "Https / http:  $https_status <br>";
-// exit();
+echo "Device: $device_type <br>";
+echo "Country: $country <br>";
+echo "Risk Score: $risk_score <br>";
+echo "Risk Level: $risk_level <br>";
+echo "Https / http:  $https_status <br>";
+exit();
 $stmt_insert->bind_param(
     "issssiiisiis",
     $user_id,

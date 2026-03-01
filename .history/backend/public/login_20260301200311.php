@@ -154,10 +154,7 @@ if ($risk_level === "HIGH") {
     echo "<h3 style='color:red;'>⚠ High Risk Login Detected!</h3>";
     echo "Access temporarily restricted.";
     exit();
-
-} 
-elseif ($risk_level === "MEDIUM") 
-{
+} elseif ($risk_level === "MEDIUM") {
 
     // Generate OTP
     $_SESSION["temp_user_id"] = $user_id;
@@ -174,9 +171,7 @@ elseif ($risk_level === "MEDIUM")
     //echo "<a href='otp_verify.php'>Verify OTP</a>";
     //exit();
 
-} 
-  else 
-  {
+} else {
 
     // LOW RISK → direct login
     $_SESSION["user_id"] = $user_id;
@@ -186,5 +181,3 @@ elseif ($risk_level === "MEDIUM")
     header("Location: dashboard.php");
     exit();
 }
-
-?>
