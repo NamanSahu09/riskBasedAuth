@@ -90,43 +90,24 @@ $row_location = $result_location->fetch_assoc();
 
 $new_location = ($row_location["count"] > 0) ? 0 : 1;
 
-
 /* =========================
-   ML RISK PREDICTION
+   RISK SCORE CALCULATION
 ========================= */
 
-$data = [
-    "new_device" => (int)$new_device,
-    "new_location" => (int)$new_location,
-    "odd_time" => (int)$odd_time,
-    "https_status" => (int)$https_status
-];
+$risk_score = 0;
 
-$options = [
-    "http" => [
-        "header"  => "Content-Type: application/json\r\n",
-        "method"  => "POST",
-        "content" => json_encode($data),
-        "timeout" => 5
-    ]
-];
+if ($new_device)     $risk_score += 30;
+if ($new_location)   $risk_score += 30;
+if ($odd_time)       $risk_score += 20;
+if (!$https_status)  $risk_score += 0;
 
-$context  = stream_context_create($options);
-
-$result = @file_get_contents("http://127.0.0.1:5000/predict", false, $context);
-
-if ($result === FALSE) {
-    die("ML Service Unavailable");
+if ($risk_score >= 70) {
+    $risk_level = "HIGH";
+} elseif ($risk_score >= 40) {
+    $risk_level = "MEDIUM";
+} else {
+    $risk_level = "LOW";
 }
-
-$response = json_decode($result, true);
-
-if (!isset($response["risk_level"])) {
-    die("Invalid ML Response");
-}
-
-$risk_level = $response["risk_level"];
-
 
 /* =========================
    STORE LOGIN RECORD

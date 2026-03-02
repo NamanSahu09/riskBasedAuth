@@ -22,12 +22,6 @@ $medium = $conn->query("SELECT COUNT(*) as total FROM login_history WHERE risk_l
 
 $low = $conn->query("SELECT COUNT(*) as total FROM login_history WHERE risk_level='LOW'")->fetch_assoc()["total"];
 
-
-
-
-?>
-
-
 <h3>Login Risk Summary</h3>
 
 <p>Total Logins: <b><?= $total ?></b></p>
@@ -35,7 +29,12 @@ $low = $conn->query("SELECT COUNT(*) as total FROM login_history WHERE risk_leve
 <p style="color:orange;">Medium Risk: <b><?= $medium ?></b></p>
 <p style="color:green;">Low Risk: <b><?= $low ?></b></p>
 
-<hr> 
+<hr>
+
+
+?>
+
+
 
 <h2>Admin Risk Dashboard</h2>
 

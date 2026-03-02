@@ -28,14 +28,6 @@ $low = $conn->query("SELECT COUNT(*) as total FROM login_history WHERE risk_leve
 ?>
 
 
-<h3>Login Risk Summary</h3>
-
-<p>Total Logins: <b><?= $total ?></b></p>
-<p style="color:red;">High Risk: <b><?= $high ?></b></p>
-<p style="color:orange;">Medium Risk: <b><?= $medium ?></b></p>
-<p style="color:green;">Low Risk: <b><?= $low ?></b></p>
-
-<hr> 
 
 <h2>Admin Risk Dashboard</h2>
 

@@ -13,14 +13,7 @@ JOIN users u ON l.user_id = u.id
 ORDER BY l.login_time DESC
 ");
 
-// Summary Stats
-$total = $conn->query("SELECT COUNT(*) as total FROM login_history")->fetch_assoc()["total"];
 
-$high = $conn->query("SELECT COUNT(*) as total FROM login_history WHERE risk_level='HIGH'")->fetch_assoc()["total"];
-
-$medium = $conn->query("SELECT COUNT(*) as total FROM login_history WHERE risk_level='MEDIUM'")->fetch_assoc()["total"];
-
-$low = $conn->query("SELECT COUNT(*) as total FROM login_history WHERE risk_level='LOW'")->fetch_assoc()["total"];
 
 
 
@@ -28,14 +21,6 @@ $low = $conn->query("SELECT COUNT(*) as total FROM login_history WHERE risk_leve
 ?>
 
 
-<h3>Login Risk Summary</h3>
-
-<p>Total Logins: <b><?= $total ?></b></p>
-<p style="color:red;">High Risk: <b><?= $high ?></b></p>
-<p style="color:orange;">Medium Risk: <b><?= $medium ?></b></p>
-<p style="color:green;">Low Risk: <b><?= $low ?></b></p>
-
-<hr> 
 
 <h2>Admin Risk Dashboard</h2>
 

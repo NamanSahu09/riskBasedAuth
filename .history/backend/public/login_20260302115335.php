@@ -89,8 +89,6 @@ $result_location = $stmt_location->get_result();
 $row_location = $result_location->fetch_assoc();
 
 $new_location = ($row_location["count"] > 0) ? 0 : 1;
-
-
 /* =========================
    ML RISK PREDICTION
 ========================= */
