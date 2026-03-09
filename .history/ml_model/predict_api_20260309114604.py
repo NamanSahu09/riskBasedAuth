@@ -40,7 +40,7 @@ def predict():
 
      
     risk_map = {
-        0: "LOW",
+        0: "LOW",c
         1: "MEDIUM",
         2: "HIGH"
     }

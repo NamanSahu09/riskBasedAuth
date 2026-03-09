@@ -12,7 +12,7 @@ def load_model():
 @app.route("/predict", methods=["POST"])
 def predict():
 
-    model = load_model()
+    model = load_model()   # load latest trained model
 
     data = request.json
 
@@ -26,19 +26,16 @@ def predict():
     prediction = model.predict(features)[0]
     probabilities = model.predict_proba(features)[0]
 
-    confidence = max(probabilities)
+    #confidence = max(probabilities) * 100
+    # confidence = max(probabilities)
 
-    # convert confidence to risk severity
-    if prediction == 0:   # LOW
-        risk_score = (1 - confidence) * 30
-    elif prediction == 1: # MEDIUM
-        risk_score = 40 + (1 - confidence) * 30
-    else:                 # HIGH
-        risk_score = 70 + confidence * 30
-    
-    risk_score = risk_score * 100 / 100
-
-     
+# convert to risk severity
+if prediction == 0:   # LOW
+    risk_score = (1 - confidence) * 30
+elif prediction == 1: # MEDIUM
+    risk_score = 40 + (1 - confidence) * 30
+else:                 # HIGH
+    risk_score = 70 + confidence * 30
     risk_map = {
         0: "LOW",
         1: "MEDIUM",
@@ -47,7 +44,7 @@ def predict():
 
     return jsonify({
         "risk_level": risk_map[prediction],
-        "risk_score": round(risk_score, 2)
+        "risk_score": round(confidence, 2)
     })
 
 

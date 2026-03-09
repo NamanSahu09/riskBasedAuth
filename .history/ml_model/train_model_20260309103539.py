@@ -9,18 +9,19 @@ import joblib
 # ===============================
 
 db = mysql.connector.connect(
+    host="localhost",
     user="root",
-    password="",
-    database="riskauth_db",
-    unix_socket="/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock"
+    password="",      # your XAMPP password (usually empty)
+    database="risk_auth"
 )
+
 query = """
 SELECT
-new_device,
-new_location,
-odd_time,
-https_status,
-risk_level
+    new_device,
+    new_location,
+    odd_time,
+    https_status,
+    risk_level
 FROM login_history
 WHERE risk_level IS NOT NULL
 """
@@ -29,9 +30,7 @@ df = pd.read_sql(query, db)
 
 print("Dataset loaded from database")
 print(df.head())
-# if len(df) < 20:
-#     print("Not enough data to train model yet")
-#     exit()
+
 # ===============================
 # DATA PREPARATION
 # ===============================
@@ -60,7 +59,7 @@ print("Model trained successfully")
 
 # ===============================
 # SAVE MODEL
-# ===============================
+# ==============================watch -n 60 python train_model.py=
 
 joblib.dump(model, "risk_model.pkl")
 

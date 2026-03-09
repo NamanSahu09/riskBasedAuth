@@ -29,9 +29,9 @@ df = pd.read_sql(query, db)
 
 print("Dataset loaded from database")
 print(df.head())
-# if len(df) < 20:
-#     print("Not enough data to train model yet")
-#     exit()
+if len(df) < 20:
+    print("Not enough data to train model yet")
+    exit()
 # ===============================
 # DATA PREPARATION
 # ===============================

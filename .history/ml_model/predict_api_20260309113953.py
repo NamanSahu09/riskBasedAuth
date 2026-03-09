@@ -37,7 +37,6 @@ def predict():
         risk_score = 70 + confidence * 30
     
     risk_score = risk_score * 100 / 100
-
      
     risk_map = {
         0: "LOW",
