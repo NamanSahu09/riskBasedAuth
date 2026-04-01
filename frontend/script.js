@@ -49,7 +49,33 @@ function setScanCount(n) {
   if (scanCountEl) scanCountEl.textContent = formatNum(n);
 }
 
-function runScan() {
+
+function showResult(url, data) {
+
+  const scanList = document.querySelector(".scan-list");
+
+  let riskClass = "secure";
+
+  if (data.risk_level === "HIGH") riskClass = "danger";
+  else if (data.risk_level === "MEDIUM") riskClass = "moderate";
+
+  const row = document.createElement("div");
+  row.className = "scan-row";
+
+  row.innerHTML = `
+    <div class="scan-shield ${riskClass}">🛡️</div>
+    <span class="scan-url">${url}</span>
+    <span class="scan-status ${riskClass}">${data.risk_level}</span>
+    <span class="scan-score ${riskClass}">${Math.round(data.risk_score)}/100</span>
+    <a class="scan-link" href="${url}" target="_blank">↗</a>
+  `;
+
+  scanList.prepend(row);
+}
+
+
+
+async function runScan() {
   if (!scanBtn || scanning) return;
 
   const url = urlInput ? urlInput.value.trim() : '';
@@ -62,6 +88,50 @@ function runScan() {
     }
     return;
   }
+
+  scanning = true;
+
+  scanBtn.innerHTML = '⏳ Scanning...';
+  scanBtn.classList.add('scanning');
+
+  try {
+
+    const https_status = url.startsWith("https") ? 1 : 0;
+
+    const res = await fetch("https://risk-ml.onrender.com/predict", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        new_device: 0,
+        new_location: 0,
+        odd_time: 0,
+        https_status: https_status
+      })
+    });
+
+    const data = await res.json();
+
+    showResult(url, data);
+
+    scanBtn.innerHTML = 'Done!';
+    scanBtn.classList.remove('scanning');
+    scanBtn.classList.add('done');
+
+  } catch (err) {
+    console.error(err);
+    alert("API Error");
+
+    scanBtn.innerHTML = 'Error';
+  }
+
+  setTimeout(() => {
+    scanBtn.innerHTML = '🔍 Scan Now';
+    scanBtn.classList.remove('done');
+    scanning = false;
+  }, 2000);
+}
 
   scanning = true;
   scanBtn.innerHTML = '<span class="scan-icon">⏳</span><span class="btn-text"> Scanning...</span>';

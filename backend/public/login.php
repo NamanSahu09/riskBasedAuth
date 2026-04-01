@@ -113,7 +113,7 @@ $options = [
 
 $context  = stream_context_create($options);
 
-$result = @file_get_contents("http://127.0.0.1:5000/predict", false, $context);
+$result = @file_get_contents("https://risk-ml.onrender.com/predict", false, $context);
 
 if ($result === FALSE) {
     die("ML Service Unavailable");
