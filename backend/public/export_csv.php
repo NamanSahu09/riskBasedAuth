@@ -16,6 +16,7 @@ fputcsv($output, [
     "https_status",
     "risk_score",
     "risk_level"
+    
 ]);
 
 // Fetch dataset
