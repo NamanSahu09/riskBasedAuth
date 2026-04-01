@@ -1,0 +1,6 @@
+certifi==2025.11.12
+wheel==0.45.1
+flask
+numpy
+scikit-learn
+joblib

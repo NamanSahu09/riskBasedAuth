@@ -38,9 +38,9 @@ $user_id = $user["id"];
    BEHAVIOUR CAPTURE
 ========================= */
 
-$ip = $_SERVER['REMOTE_ADDR'];
+//$ip = $_SERVER['REMOTE_ADDR'];
 // For testing location manually:
-//$ip = "8.8.8.8";
+// $ip = "8.8.8.8";
 
 $user_agent = $_SERVER['HTTP_USER_AGENT'];
 $login_time = date("Y-m-d H:i:s");
@@ -65,7 +65,7 @@ $new_device = ($row_device["count"] > 0) ? 0 : 1;
 ========================= */
 
 $hour = date("H");
-$odd_time = ($hour >= 17 && $hour <= 5) ? 1 : 0;
+$odd_time = ($hour >= 0 && $hour <= 5) ? 1 : 0;
 
 /* =========================
    LOCATION DETECTION

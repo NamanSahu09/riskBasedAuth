@@ -40,7 +40,7 @@ $user_id = $user["id"];
 
 $ip = $_SERVER['REMOTE_ADDR'];
 // For testing location manually:
-//$ip = "8.8.8.8";
+// $ip = "8.8.8.8";
 
 $user_agent = $_SERVER['HTTP_USER_AGENT'];
 $login_time = date("Y-m-d H:i:s");
@@ -65,7 +65,7 @@ $new_device = ($row_device["count"] > 0) ? 0 : 1;
 ========================= */
 
 $hour = date("H");
-$odd_time = ($hour >= 17 && $hour <= 5) ? 1 : 0;
+$odd_time = ($hour >= 0 && $hour <= 5) ? 1 : 0;
 
 /* =========================
    LOCATION DETECTION
@@ -90,44 +90,24 @@ $row_location = $result_location->fetch_assoc();
 
 $new_location = ($row_location["count"] > 0) ? 0 : 1;
 
-
 /* =========================
-   ML RISK PREDICTION
+   RISK SCORE CALCULATION
 ========================= */
 
-$data = [
-    "new_device" => (int)$new_device,
-    "new_location" => (int)$new_location,
-    "odd_time" => (int)$odd_time,
-    "https_status" => (int)$https_status
-];
+$risk_score = 0;
 
-$options = [
-    "http" => [
-        "header"  => "Content-Type: application/json\r\n",
-        "method"  => "POST",
-        "content" => json_encode($data),
-        "timeout" => 5
-    ]
-];
+if ($new_device)     $risk_score += 30;
+if ($new_location)   $risk_score += 30;
+if ($odd_time)       $risk_score += 20;
+//if (!$https_status)  $risk_score += 20;
 
-$context  = stream_context_create($options);
-
-$result = @file_get_contents("http://127.0.0.1:5000/predict", false, $context);
-
-if ($result === FALSE) {
-    die("ML Service Unavailable");
+if ($risk_score >= 70) {
+    $risk_level = "HIGH";
+} elseif ($risk_score >= 40) {
+    $risk_level = "MEDIUM";
+} else {
+    $risk_level = "LOW";
 }
-
-$response = json_decode($result, true);
-
-if (!isset($response["risk_level"])) {
-    die("Invalid ML Response");
-}
-
-$risk_level = $response["risk_level"];
-$risk_score = $response["risk_score"];
-
 
 /* =========================
    STORE LOGIN RECORD
@@ -174,7 +154,10 @@ if ($risk_level === "HIGH") {
     echo "<h3 style='color:red;'>⚠ High Risk Login Detected!</h3>";
     echo "Access temporarily restricted.";
     exit();
-} elseif ($risk_level === "MEDIUM") {
+
+} 
+elseif ($risk_level === "MEDIUM") 
+{
 
     // Generate OTP
     $_SESSION["temp_user_id"] = $user_id;
@@ -191,7 +174,9 @@ if ($risk_level === "HIGH") {
     //echo "<a href='otp_verify.php'>Verify OTP</a>";
     //exit();
 
-} else {
+} 
+  else 
+  {
 
     // LOW RISK → direct login
     $_SESSION["user_id"] = $user_id;
@@ -201,3 +186,5 @@ if ($risk_level === "HIGH") {
     header("Location: dashboard.php");
     exit();
 }
+
+?>
