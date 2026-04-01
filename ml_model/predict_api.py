@@ -5,8 +5,12 @@ import numpy as np
 app = Flask(__name__)
 
 # Function to load latest model
+import os
+
 def load_model():
-    return joblib.load("risk_model.pkl")
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(BASE_DIR, "risk_model.pkl")
+    return joblib.load(model_path)
 
 
 @app.route("/predict", methods=["POST"])
