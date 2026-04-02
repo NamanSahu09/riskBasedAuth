@@ -113,10 +113,7 @@ async function runScan() {
 
     const data = await res.json();
     const element = async () => {
-      const el = document.createElement("div");
-      el.textContent = "Loading...";
-      return el;
-    }
+      
     showResult(url, data);
 
     scanBtn.innerHTML = 'Done!';
@@ -126,6 +123,7 @@ async function runScan() {
   } catch (err) {
     console.error(err);
     alert("API Error");
+
     scanBtn.innerHTML = 'Error';
   }
 
