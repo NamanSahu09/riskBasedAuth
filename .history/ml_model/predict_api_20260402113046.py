@@ -4,7 +4,7 @@ import numpy as np
 from flask_cors import CORS
 import os
 
-app = Flask(__name__)   
+app = Flask(__name__)   # ✅ FIRST create app
 CORS(app)             
 
 # Function to load model
