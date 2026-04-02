@@ -29,7 +29,6 @@ __pycache__/
 *.pyc
 
 # ML model files
-*.pkl
 
 # XAMPP logs
 *.log

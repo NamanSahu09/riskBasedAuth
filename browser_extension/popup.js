@@ -32,7 +32,7 @@ for(let word of suspiciousWords){
 
 
   // Otherwise call ML API
-  fetch("http://127.0.0.1:5000/predict", {
+  fetch("https://risk-ml.onrender.com/predict", {
 
       method: "POST",
 
