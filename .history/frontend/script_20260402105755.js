@@ -98,7 +98,7 @@ async function runScan() {
 
     const https_status = url.startsWith("https") ? 1 : 0;
 
-    const res = await fetch("backend/scan.php", {
+    const res = await fetch("https://risk-ml.onrender.com/predict", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -112,11 +112,7 @@ async function runScan() {
     });
 
     const data = await res.json();
-    const element = async () => {
-      const el = document.createElement("div");
-      el.textContent = "Loading...";
-      return el;
-    }
+
     showResult(url, data);
 
     scanBtn.innerHTML = 'Done!';
@@ -126,6 +122,7 @@ async function runScan() {
   } catch (err) {
     console.error(err);
     alert("API Error");
+
     scanBtn.innerHTML = 'Error';
   }
 

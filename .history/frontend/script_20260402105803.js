@@ -98,7 +98,19 @@ async function runScan() {
 
     const https_status = url.startsWith("https") ? 1 : 0;
 
-    const res = await fetch("backend/scan.php", {
+    const res = await const res = await fetch("backend/scan.php"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        new_device: 0,
+        new_location: 0,
+        odd_time: 0,
+        https_status: https_status
+      })
+    });
+, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -112,11 +124,7 @@ async function runScan() {
     });
 
     const data = await res.json();
-    const element = async () => {
-      const el = document.createElement("div");
-      el.textContent = "Loading...";
-      return el;
-    }
+
     showResult(url, data);
 
     scanBtn.innerHTML = 'Done!';
@@ -126,6 +134,7 @@ async function runScan() {
   } catch (err) {
     console.error(err);
     alert("API Error");
+
     scanBtn.innerHTML = 'Error';
   }
 

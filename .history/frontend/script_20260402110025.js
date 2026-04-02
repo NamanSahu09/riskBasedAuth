@@ -126,6 +126,7 @@ async function runScan() {
   } catch (err) {
     console.error(err);
     alert("API Error");
+
     scanBtn.innerHTML = 'Error';
   }
 
