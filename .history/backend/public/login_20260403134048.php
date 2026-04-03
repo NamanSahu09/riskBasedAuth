@@ -39,9 +39,11 @@ $user_id = $user["id"];
 ========================= */
 
 $ip = $_SERVER['REMOTE_ADDR'];
+// For testing location manually:
+//$ip = "8.8.8.8";
+
 $user_agent = $_SERVER['HTTP_USER_AGENT'];
 $login_time = date("Y-m-d H:i:s");
-
 $https_status = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 1 : 0;
 
 /* =========================
@@ -53,7 +55,8 @@ $device_type = (preg_match("/mobile/i", $user_agent)) ? "Mobile" : "Desktop";
 $stmt_device = $conn->prepare("SELECT COUNT(*) as count FROM login_history WHERE user_id = ? AND user_agent = ?");
 $stmt_device->bind_param("is", $user_id, $user_agent);
 $stmt_device->execute();
-$row_device = $stmt_device->get_result()->fetch_assoc();
+$result_device = $stmt_device->get_result();
+$row_device = $result_device->fetch_assoc();
 
 $new_device = ($row_device["count"] > 0) ? 0 : 1;
 
@@ -70,23 +73,26 @@ $odd_time = ($hour >= 0 && $hour <= 6) ? 1 : 0;
 
 $country = "Unknown";
 
-$geo = @file_get_contents("http://ip-api.com/json/" . $ip);
-if ($geo !== false) {
-    $geo_data = json_decode($geo, true);
-    if (isset($geo_data["country"])) {
-        $country = $geo_data["country"];
+$geo_data = @file_get_contents("http://ip-api.com/json/" . $ip);
+
+if ($geo_data !== false) {
+    $geo_json = json_decode($geo_data, true);
+    if (isset($geo_json["country"])) {
+        $country = $geo_json["country"];
     }
 }
 
 $stmt_location = $conn->prepare("SELECT COUNT(*) as count FROM login_history WHERE user_id = ? AND country = ?");
 $stmt_location->bind_param("is", $user_id, $country);
 $stmt_location->execute();
-$row_location = $stmt_location->get_result()->fetch_assoc();
+$result_location = $stmt_location->get_result();
+$row_location = $result_location->fetch_assoc();
 
 $new_location = ($row_location["count"] > 0) ? 0 : 1;
 
+
 /* =========================
-   ML RISK PREDICTION (cURL FIX)
+   ML RISK PREDICTION
 ========================= */
 
 $data = [
@@ -96,34 +102,32 @@ $data = [
     "https_status" => (int)$https_status
 ];
 
-$ch = curl_init("https://risk-ml.onrender.com/predict");
+$options = [
+    "http" => [
+        "header"  => "Content-Type: application/json\r\n",
+        "method"  => "POST",
+        "content" => json_encode($data),
+        "timeout" => 5
+    ]
+];
 
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "Content-Type: application/json"
-]);
+$context  = stream_context_create($options);
 
-// 🔥 IMPORTANT FIX for InfinityFree
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+$result = @file_get_contents("https://risk-ml.onrender.com/predict", false, $context);
 
-$response = curl_exec($ch);
-
-if ($response === false) {
+if ($result === FALSE) {
     die("ML Service Unavailable");
 }
 
-curl_close($ch);
+$response = json_decode($result, true);
 
-$result = json_decode($response, true);
-
-if (!isset($result["risk_level"])) {
+if (!isset($response["risk_level"])) {
     die("Invalid ML Response");
 }
 
-$risk_level = $result["risk_level"];
-$risk_score = $result["risk_score"];
+$risk_level = $response["risk_level"];
+$risk_score = $response["risk_score"];
+
 
 /* =========================
    STORE LOGIN RECORD
@@ -135,6 +139,12 @@ INSERT INTO login_history
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ");
 
+// echo "Device: $device_type <br>";
+// echo "Country: $country <br>";
+// echo "Risk Score: $risk_score <br>";
+// echo "Risk Level: $risk_level <br>";
+// echo "Https / http:  $https_status <br>";
+// exit();
 $stmt_insert->bind_param(
     "issssiiisiis",
     $user_id,
@@ -166,18 +176,24 @@ if ($risk_level === "HIGH") {
     exit();
 } elseif ($risk_level === "MEDIUM") {
 
+    // Generate OTP
     $_SESSION["temp_user_id"] = $user_id;
     $_SESSION["temp_username"] = $username;
     $_SESSION["temp_risk_level"] = $risk_level;
 
     $otp = rand(100000, 999999);
     $_SESSION["otp"] = $otp;
-    $_SESSION["otp_expiry"] = time() + 300;
-
+    $_SESSION["otp_expiry"] = time() + 300; // 5 min expiry 
     header("Location: otp_verify.php");
     exit();
+    //echo "<h3>Medium Risk Login</h3>";
+    //echo "OTP Generated (Simulation): <b>$otp</b><br>";
+    //echo "<a href='otp_verify.php'>Verify OTP</a>";
+    //exit();
+
 } else {
 
+    // LOW RISK → direct login
     $_SESSION["user_id"] = $user_id;
     $_SESSION["username"] = $username;
     $_SESSION["risk_level"] = $risk_level;

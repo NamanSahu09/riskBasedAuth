@@ -164,6 +164,7 @@ if ($risk_level === "HIGH") {
     echo "<h3 style='color:red;'>⚠ High Risk Login Detected!</h3>";
     echo "Access temporarily restricted.";
     exit();
+
 } elseif ($risk_level === "MEDIUM") {
 
     $_SESSION["temp_user_id"] = $user_id;
@@ -176,6 +177,7 @@ if ($risk_level === "HIGH") {
 
     header("Location: otp_verify.php");
     exit();
+
 } else {
 
     $_SESSION["user_id"] = $user_id;
@@ -185,3 +187,4 @@ if ($risk_level === "HIGH") {
     header("Location: dashboard.php");
     exit();
 }
+?>
