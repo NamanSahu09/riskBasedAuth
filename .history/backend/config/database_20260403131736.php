@@ -7,7 +7,7 @@ $dbname = "if0_41559408_risk_auth";
 
 $conn = new mysqli($host, $user, $password, $dbname);
 
-if ($conn->connect_error) {
+if ($conn->connect_error) {git 
     die("Connection failed: " . $conn->connect_error);
 }
 

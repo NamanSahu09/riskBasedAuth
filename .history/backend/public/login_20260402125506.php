@@ -65,7 +65,7 @@ $new_device = ($row_device["count"] > 0) ? 0 : 1;
 ========================= */
 
 $hour = date("H");
-$odd_time = ($hour >= 0 && $hour <= 6) ? 1 : 0;
+$odd_time = ($hour >= 0 && $hour <= 5) ? 1 : 0;
 
 /* =========================
    LOCATION DETECTION
