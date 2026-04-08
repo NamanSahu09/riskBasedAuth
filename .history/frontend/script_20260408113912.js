@@ -135,11 +135,11 @@ async function runScan() {
         })
       });
   
-      const data = await res.json();  //  
+      const data = await res.json();  // ✅ FIRST define
   
       console.log("DATA:", data);
   
-      // 
+      // ✅ THEN use it
       showResult(url, data);
   
     } catch (err) {

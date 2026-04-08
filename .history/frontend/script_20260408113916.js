@@ -135,7 +135,7 @@ async function runScan() {
         })
       });
   
-      const data = await res.json();  //  
+      const data = await res.json();  // ✅ FIRST define
   
       console.log("DATA:", data);
   
