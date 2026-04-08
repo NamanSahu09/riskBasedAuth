@@ -108,46 +108,57 @@ async function runScan() {
     setScanCount(orig + tick);
   }, 300);
 
-  async function runScan() {
+  try {
 
-    if (!scanBtn || scanning) return;
-  
-    const url = urlInput ? urlInput.value.trim() : '';
-  
-    if (!url) return;
-  
-    scanning = true;
-  
-    try {
-  
-      const https_status = url.startsWith("https") ? 1 : 0;
-  
-      const res = await fetch("https://risk-ml.onrender.com/predict", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          new_device: 0,
-          new_location: 0,
-          odd_time: 0,
-          https_status: https_status
-        })
-      });
-  
-      const data = await res.json();  //  
-  
-      console.log("DATA:", data);
-  
-      // 
-      showResult(url, data);
-  
-    } catch (err) {
-      console.error(err);
-      alert("❌ API Error / ML Service Down");
+    const https_status = url.startsWith("https") ? 1 : 0;
+
+    const res = await fetch("https://riskauth.infinityfreeapp.com/backend/public/scan.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        new_device: 0,
+        new_location: 0,
+        odd_time: 0,
+        https_status: https_status
+      })
+    });
+
+
+    console.log("Sending request...");
+    console.log("URL:", url);
+    console.log("Response:", data);
+
+    const data = await res.json();
+
+    console.log("ML RESULT:", data);
+
+    // show in UI
+    showResult(url, data);
+
+    // optional alert for HIGH risk
+    if (data.risk_level === "HIGH") {
+      alert(
+        "⚠ WARNING!\n\n" +
+        "This website may be unsafe.\n\n" +
+        "Risk Level: " + data.risk_level +
+        "\nRisk Score: " + Math.max(1, Math.round(data.risk_score))
+      );
     }
-  
-    scanning = false;
+
+    // success UI
+    scanBtn.innerHTML = '✅ Done!';
+    scanBtn.classList.remove('scanning');
+    scanBtn.classList.add('done');
+
+  } 
+  catch (err) 
+  {
+    console.error(err);
+
+    alert("❌ API Error / ML Service Down");
+    scanBtn.innerHTML = 'Error';
   }
 
   // reset button
