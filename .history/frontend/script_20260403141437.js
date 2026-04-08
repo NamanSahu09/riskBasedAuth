@@ -112,7 +112,7 @@ async function runScan() {
 
     const https_status = url.startsWith("https") ? 1 : 0;
 
-    const res = await fetch("https://riskauth.infinityfreeapp.com/backend/public/scan.php", {
+    const res = await fetch("backend/scan.php", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
