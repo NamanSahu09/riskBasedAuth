@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════
-   SecureCheck — script.js (FINAL FIXED)
+   SecureCheck — script.js (FINAL CLEAN VERSION)
    ═══════════════════════════════════════════ */
 
-// ── SIDEBAR ─────────────────────────
+// ── SIDEBAR COLLAPSE ─────────────────────────
 const sidebar     = document.getElementById('sidebar');
 const mainContent = document.getElementById('mainContent');
 const collapseBtn = document.getElementById('collapseBtn');
@@ -21,6 +21,7 @@ function applyCollapse(collapsed) {
   }
 }
 
+// restore state
 const savedCollapsed = localStorage.getItem(COLLAPSED_KEY) === 'true';
 applyCollapse(savedCollapsed);
 
@@ -38,7 +39,7 @@ const urlInput = document.getElementById('urlInput');
 const urlBar   = document.getElementById('urlBar');
 const scanCountEl = document.getElementById('scanCount');
 
-let scanning = false;
+let scanning    = false;
 let liveCounter = 4821;
 
 function formatNum(n) {
@@ -50,7 +51,7 @@ function setScanCount(n) {
   if (scanCountEl) scanCountEl.textContent = formatNum(n);
 }
 
-// ── SHOW RESULT ─────────────────────────
+// ── SHOW RESULT IN UI ─────────────────────────
 function showResult(url, data) {
 
   const scanList = document.querySelector(".scan-list");
@@ -68,14 +69,14 @@ function showResult(url, data) {
     <div class="scan-shield ${riskClass}">🛡️</div>
     <span class="scan-url">${url}</span>
     <span class="scan-status ${riskClass}">${data.risk_level}</span>
-    <span class="scan-score ${riskClass}">${Math.max(1, Math.round(data.risk_score))}/100</span>
+    <span class="scan-score ${riskClass}">${Math.round(data.risk_score)}/100</span>
     <a class="scan-link" href="${url}" target="_blank">↗</a>
   `;
 
   scanList.prepend(row);
 }
 
-// ── MAIN SCAN FUNCTION (FIXED) ─────────────────────────
+// ── MAIN SCAN FUNCTION ─────────────────────────
 async function runScan() {
 
   if (!scanBtn || scanning) return;
@@ -94,6 +95,7 @@ async function runScan() {
 
   scanning = true;
 
+  // UI loading
   scanBtn.innerHTML = '⏳ Scanning...';
   scanBtn.classList.add('scanning');
 
@@ -106,53 +108,49 @@ async function runScan() {
     setScanCount(orig + tick);
   }, 300);
 
-  try {
+  async function runScan() {
 
-    const https_status = url.startsWith("https") ? 1 : 0;
-
-    const res = await fetch("https://risk-ml.onrender.com/predict", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        new_device: 0,
-        new_location: 0,
-        odd_time: 0,
-        https_status: https_status
-      })
-    });
-
-    if (!res.ok) {
-      throw new Error("API response failed");
+    if (!scanBtn || scanning) return;
+  
+    const url = urlInput ? urlInput.value.trim() : '';
+  
+    if (!url) return;
+  
+    scanning = true;
+  
+    try {
+  
+      const https_status = url.startsWith("https") ? 1 : 0;
+  
+      const res = await fetch("https://riskauth.infinityfreeapp.com/backend/public/scan.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          new_device: 0,
+          new_location: 0,
+          odd_time: 0,
+          https_status: https_status
+        })
+      });
+  
+      const data = await res.json();  //  
+  
+      console.log("DATA:", data);
+  
+      // 
+      showResult(url, data);
+  
+    } catch (err) {
+      console.error(err);
+      alert("❌ API Error / ML Service Down");
     }
-
-    const data = await res.json();  // ✅ correct order
-
-    console.log("ML DATA:", data);
-
-    showResult(url, data);
-
-    if (data.risk_level === "HIGH") {
-      alert(
-        "⚠ Unsafe Website!\n\n" +
-        "Risk Level: " + data.risk_level +
-        "\nRisk Score: " + Math.round(data.risk_score)
-      );
-    }
-
-    scanBtn.innerHTML = '✅ Done!';
-    scanBtn.classList.remove('scanning');
-    scanBtn.classList.add('done');
-
-  } catch (err) {
-    console.error("ERROR:", err);
-    alert("❌ API Error / ML Service Down");
-    scanBtn.innerHTML = 'Error';
+  
+    scanning = false;
   }
 
-  clearInterval(iv);
-
+  // reset button
   setTimeout(() => {
     scanBtn.innerHTML = '🔍 Scan Now';
     scanBtn.classList.remove('done');
