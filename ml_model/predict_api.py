@@ -26,15 +26,16 @@ def load_model_if_updated():
 
 @app.route("/")
 def home():
-    return "ML API running 🚀"
+    return "ML API running "
 
 
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        load_model_if_updated()  # 🔥 AUTO RELOAD
+        load_model_if_updated() 
 
         data = request.json
+
 
         features = np.array([[ 
             data["new_device"],
