@@ -150,37 +150,30 @@ setInterval(() => {
 
 /* ═══════════════════════════════════════════
    AUTH SYSTEM
-   Storage: localStorage  (demo — no real backend)
-   Keys:
-     securecheck_users  → JSON array of {name, email, password}
-     securecheck_session → email of current user
+   Backend: PHP MySQL
+   Endpoints:
+     POST /backend/public/login.php
+     POST /backend/public/signup.php
+     POST /backend/public/logout.php
+     GET  /backend/public/session.php
    ═══════════════════════════════════════════ */
 
-const AUTH_USERS_KEY   = 'securecheck_users';
-const AUTH_SESSION_KEY = 'securecheck_session';
+const API_BASE = '../backend/public/';
 
 // ── Helpers ──────────────────────
-function getUsers() {
-  try { return JSON.parse(localStorage.getItem(AUTH_USERS_KEY)) || []; }
-  catch { return []; }
-}
-function saveUsers(users) {
-  localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(users));
-}
-function getSession() {
-  return localStorage.getItem(AUTH_SESSION_KEY) || null;
-}
-function setSession(email) {
-  localStorage.setItem(AUTH_SESSION_KEY, email);
-}
-function clearSession() {
-  localStorage.removeItem(AUTH_SESSION_KEY);
-}
-function getUserByEmail(email) {
-  return getUsers().find(u => u.email.toLowerCase() === email.toLowerCase());
-}
 function initials(name) {
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+// Session management with localStorage (mirrors PHP session)
+function getSession() {
+  return localStorage.getItem('securecheck_session');
+}
+function setSession(user) {
+  localStorage.setItem('securecheck_session', JSON.stringify(user));
+}
+function clearSession() {
+  localStorage.removeItem('securecheck_session');
 }
 
 // ── UI elements ──────────────────
@@ -255,24 +248,25 @@ if (tabSignup) tabSignup.addEventListener('click', () => switchTab('signup'));
 function renderAuthState() {
   const session = getSession();
   if (session) {
-    const user = getUserByEmail(session);
+    const user = JSON.parse(session);
     if (user) {
-      // signed in
       if (loginBtn) loginBtn.style.display = 'none';
       if (userPill) userPill.style.display = 'flex';
-      if (userAvatar) userAvatar.textContent = initials(user.name || user.email);
-      if (userNameEl) userNameEl.textContent = user.name || user.email;
+      if (userAvatar) userAvatar.textContent = initials(user.username || user.name || 'U');
+      if (userNameEl) userNameEl.textContent = user.username || user.name || 'User';
       return;
     }
   }
-  // signed out
   if (loginBtn) loginBtn.style.display = 'flex';
   if (userPill) userPill.style.display = 'none';
 }
 
 // ── Sign out ──────────────────────
 if (signOutBtn) {
-  signOutBtn.addEventListener('click', () => {
+  signOutBtn.addEventListener('click', async () => {
+    try {
+      await fetch(API_BASE + 'logout.php', { method: 'POST' });
+    } catch (e) { console.error('Logout error:', e); }
     clearSession();
     renderAuthState();
     showToast('👋 Signed out successfully');
@@ -281,31 +275,58 @@ if (signOutBtn) {
 
 // ── Login submit ──────────────────────
 if (loginSubmit) {
-  loginSubmit.addEventListener('click', () => {
-    const email = loginEmail ? loginEmail.value.trim() : '';
+  loginSubmit.addEventListener('click', async () => {
+    const username = loginEmail ? loginEmail.value.trim() : '';
     const pass  = loginPassword ? loginPassword.value : '';
 
-    if (!email || !pass) {
+    if (!username || !pass) {
       if (loginError) loginError.textContent = 'Please fill in all fields.';
       return;
     }
 
-    const user = getUserByEmail(email);
-    if (!user || user.password !== pass) {
-      if (loginError) loginError.textContent = 'Invalid email or password.';
-      return;
+    loginSubmit.disabled = true;
+    loginSubmit.textContent = 'Signing in...';
+
+    try {
+      const res = await fetch(API_BASE + 'login.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password: pass })
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        if (loginError) loginError.textContent = data.error || 'Login failed';
+        loginSubmit.disabled = false;
+        loginSubmit.textContent = 'Sign In';
+        return;
+      }
+
+      if (data.requires_otp) {
+        if (loginError) loginError.textContent = 'OTP verification required. Please check your email.';
+        loginSubmit.disabled = false;
+        loginSubmit.textContent = 'Sign In';
+        return;
+      }
+
+      setSession(data.user);
+      closeModal();
+      renderAuthState();
+      showToast('✅ Welcome back, ' + (data.user.username || 'User') + '!');
+    } catch (err) {
+      console.error('Login error:', err);
+      if (loginError) loginError.textContent = 'Server error. Please try again.';
     }
 
-    setSession(email);
-    closeModal();
-    renderAuthState();
-    showToast('✅ Welcome back, ' + (user.name || 'User') + '!');
+    loginSubmit.disabled = false;
+    loginSubmit.textContent = 'Sign In';
   });
 }
 
 // ── Signup submit ──────────────────────
 if (signupSubmit) {
-  signupSubmit.addEventListener('click', () => {
+  signupSubmit.addEventListener('click', async () => {
     const name  = signupName ? signupName.value.trim() : '';
     const email = signupEmail ? signupEmail.value.trim() : '';
     const pass  = signupPassword ? signupPassword.value : '';
@@ -322,28 +343,46 @@ if (signupSubmit) {
       if (signupError) signupError.textContent = 'Password must be at least 6 characters.';
       return;
     }
-    if (getUserByEmail(email)) {
-      if (signupError) signupError.textContent = 'An account with this email already exists.';
-      return;
+
+    signupSubmit.disabled = true;
+    signupSubmit.textContent = 'Creating account...';
+
+    try {
+      const res = await fetch(API_BASE + 'signup.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: name, email, password: pass })
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        if (signupError) signupError.textContent = data.error || 'Signup failed';
+        signupSubmit.disabled = false;
+        signupSubmit.textContent = 'Sign Up';
+        return;
+      }
+
+      setSession({ username: name, email });
+      closeModal();
+      renderAuthState();
+      showToast('🎉 Account created! Welcome, ' + name + '!');
+    } catch (err) {
+      console.error('Signup error:', err);
+      if (signupError) signupError.textContent = 'Server error. Please try again.';
     }
 
-    const users = getUsers();
-    users.push({ name, email, password: pass });
-    saveUsers(users);
-    setSession(email);
-    closeModal();
-    renderAuthState();
-    showToast('🎉 Account created! Welcome, ' + name + '!');
+    signupSubmit.disabled = false;
+    signupSubmit.textContent = 'Sign Up';
   });
 }
 
 // Enter key support in forms
-[loginEmail, loginPassword].forEach(el => {
-  if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') loginSubmit && loginSubmit.click(); });
-});
-[signupName, signupEmail, signupPassword].forEach(el => {
-  if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') signupSubmit && signupSubmit.click(); });
-});
+if (loginEmail) loginEmail.addEventListener('keydown', e => { if (e.key === 'Enter') loginSubmit && loginSubmit.click(); });
+if (loginPassword) loginPassword.addEventListener('keydown', e => { if (e.key === 'Enter') loginSubmit && loginSubmit.click(); });
+if (signupName) signupName.addEventListener('keydown', e => { if (e.key === 'Enter') signupSubmit && signupSubmit.click(); });
+if (signupEmail) signupEmail.addEventListener('keydown', e => { if (e.key === 'Enter') signupSubmit && signupSubmit.click(); });
+if (signupPassword) signupPassword.addEventListener('keydown', e => { if (e.key === 'Enter') signupSubmit && signupSubmit.click(); });
 
 // ── Init ──────────────────────
 renderAuthState();

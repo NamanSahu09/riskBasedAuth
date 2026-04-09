@@ -2,12 +2,16 @@
 session_start();
 require_once "../config/database.php";
 
+header("Content-Type: application/json");
+
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    die("Only POST method allowed");
+    echo json_encode(["success" => false, "error" => "Only POST method allowed"]);
+    exit;
 }
 
-$username = trim($_POST["username"]);
-$password = trim($_POST["password"]);
+$data = json_decode(file_get_contents("php://input"), true);
+$username = trim($data["username"] ?? "");
+$password = trim($data["password"] ?? "");
 
 /* =========================
    FETCH USER
@@ -19,7 +23,8 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    die("User not found");
+    echo json_encode(["success" => false, "error" => "User not found"]);
+    exit;
 }
 
 $user = $result->fetch_assoc();
@@ -29,7 +34,8 @@ $user = $result->fetch_assoc();
 ========================= */
 
 if (!password_verify($password, $user["password_hash"])) {
-    die("Invalid password!");
+    echo json_encode(["success" => false, "error" => "Invalid password"]);
+    exit;
 }
 
 $user_id = $user["id"];
@@ -111,7 +117,8 @@ curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 $response = curl_exec($ch);
 
 if ($response === false) {
-    die("ML Service Unavailable");
+    echo json_encode(["success" => false, "error" => "ML Service Unavailable"]);
+    exit;
 }
 
 curl_close($ch);
@@ -119,7 +126,8 @@ curl_close($ch);
 $result = json_decode($response, true);
 
 if (!isset($result["risk_level"])) {
-    die("Invalid ML Response");
+    echo json_encode(["success" => false, "error" => "Invalid ML Response"]);
+    exit;
 }
 
 $risk_level = $result["risk_level"];
@@ -152,7 +160,8 @@ $stmt_insert->bind_param(
 );
 
 if (!$stmt_insert->execute()) {
-    die("Insert failed: " . $stmt_insert->error);
+    echo json_encode(["success" => false, "error" => "Insert failed: " . $stmt_insert->error]);
+    exit;
 }
 
 /* =========================
@@ -160,12 +169,14 @@ if (!$stmt_insert->execute()) {
 ========================= */
 
 if ($risk_level === "HIGH") {
-
-    echo "<h3 style='color:red;'>⚠ High Risk Login Detected!</h3>";
-    echo "Access temporarily restricted.";
-    exit();
+    echo json_encode([
+        "success" => false,
+        "error" => "High Risk Login Detected",
+        "risk_level" => $risk_level,
+        "risk_score" => $risk_score
+    ]);
+    exit;
 } elseif ($risk_level === "MEDIUM") {
-
     $_SESSION["temp_user_id"] = $user_id;
     $_SESSION["temp_username"] = $username;
     $_SESSION["temp_risk_level"] = $risk_level;
@@ -174,14 +185,27 @@ if ($risk_level === "HIGH") {
     $_SESSION["otp"] = $otp;
     $_SESSION["otp_expiry"] = time() + 300;
 
-    header("Location: otp_verify.php");
-    exit();
+    echo json_encode([
+        "success" => true,
+        "requires_otp" => true,
+        "risk_level" => $risk_level,
+        "risk_score" => $risk_score
+    ]);
+    exit;
 } else {
-
     $_SESSION["user_id"] = $user_id;
     $_SESSION["username"] = $username;
     $_SESSION["risk_level"] = $risk_level;
 
-    header("Location: dashboard.php");
-    exit();
+    echo json_encode([
+        "success" => true,
+        "requires_otp" => false,
+        "user" => [
+            "id" => $user_id,
+            "username" => $username,
+            "email" => $email ?? ""
+        ],
+        "risk_level" => $risk_level,
+        "risk_score" => $risk_score
+    ]);
 }
