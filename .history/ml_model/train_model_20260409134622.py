@@ -73,4 +73,4 @@ model.fit(X, y)
 # ===============================
 joblib.dump(model, "risk_model.pkl")
 
-print("Model Updated Successfully")
+print("🔥 Model Updated Successfully")
