@@ -4,36 +4,26 @@ import numpy as np
 from flask_cors import CORS
 import os
 
-app = Flask(__name__)
-CORS(app)
+app = Flask(__name__)   
+CORS(app, resources={r"/*": {"origins": "*"}})             
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "risk_model.pkl")
-
-model = None
-last_loaded_time = 0
-
-
-def load_model_if_updated():
-    global model, last_loaded_time
-
-    current_time = os.path.getmtime(MODEL_PATH)
-
-    if model is None or current_time != last_loaded_time:
-        print("🔄 Reloading updated model...")
-        model = joblib.load(MODEL_PATH)
-        last_loaded_time = current_time
+# Function to load model
+def load_model():
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(BASE_DIR, "risk_model.pkl")
+    return joblib.load(model_path)
 
 
 @app.route("/")
 def home():
-    return "ML API running 🚀"
+    return "ML API running "
 
 
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        load_model_if_updated()  # 🔥 AUTO RELOAD
 
+        model = load_model()
         data = request.json
 
         features = np.array([[ 

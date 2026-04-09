@@ -1,15 +1,26 @@
 <?php
 require_once "../config/database.php";
 
+header("Content-Type: application/json");
+
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    die("Only POST method allowed");
+    echo json_encode(["success" => false, "error" => "Only POST method allowed"]);
+    exit;
 }
 
-$username = trim($_POST["username"]);
-$password = trim($_POST["password"]);
+$data = json_decode(file_get_contents("php://input"), true);
+$username = trim($data["username"] ?? "");
+$email = trim($data["email"] ?? "");
+$password = trim($data["password"] ?? "");
 
 if (empty($username) || empty($password)) {
-    die("Username and password required");
+    echo json_encode(["success" => false, "error" => "Username and password required"]);
+    exit;
+}
+
+if (empty($email)) {
+    echo json_encode(["success" => false, "error" => "Email required"]);
+    exit;
 }
 
 // Check if username already exists
@@ -19,19 +30,20 @@ $stmt_check->execute();
 $result_check = $stmt_check->get_result();
 
 if ($result_check->num_rows > 0) {
-    die("Username already taken");
+    echo json_encode(["success" => false, "error" => "Username already taken"]);
+    exit;
 }
 
 // Hash password securely
 $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
 // Insert user
-$stmt = $conn->prepare("INSERT INTO users (username, password_hash) VALUES (?, ?)");
-$stmt->bind_param("ss", $username, $hashed_password);
+$stmt = $conn->prepare("INSERT INTO users (username, password_hash, email) VALUES (?, ?, ?)");
+$stmt->bind_param("sss", $username, $hashed_password, $email);
 
 if ($stmt->execute()) {
-    echo "Account created successfully! <a href='test_login.html'>Login now</a>";
+    echo json_encode(["success" => true, "message" => "Account created successfully"]);
 } else {
-    echo "Error: " . $stmt->error;
+    echo json_encode(["success" => false, "error" => "Database error: " . $stmt->error]);
 }
 ?>

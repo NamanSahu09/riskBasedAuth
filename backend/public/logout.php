@@ -1,6 +1,6 @@
 <?php
 session_start();
+header("Content-Type: application/json");
 session_destroy();
-header("Location: test_login.html");
-exit();
+echo json_encode(["success" => true, "message" => "Logged out successfully"]);
 ?>
