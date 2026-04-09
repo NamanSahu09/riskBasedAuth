@@ -17,7 +17,7 @@ if(!isset($_SESSION['username']))
 </head>
 
 <body>
-
+<!-- This is body -->
 <nav>
 <ul>
 <li><a href="home.php">Home</a></li>
