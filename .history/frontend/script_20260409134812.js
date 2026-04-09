@@ -102,7 +102,7 @@ async function runScan() {
         new_location: 0,
         odd_time: 0,
         https_status: url.startsWith("https") ? 1 : 0,
-        url: url    
+        url: url   // 🔥 IMPORTANT
       })
     });
 

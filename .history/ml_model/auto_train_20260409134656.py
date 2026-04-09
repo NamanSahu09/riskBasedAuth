@@ -12,4 +12,4 @@ while True:
         print("❌ Error:", e)
 
     print(" Waiting 15 seconds...\n")
-    time.sleep(15)
+    time.sleep(30)

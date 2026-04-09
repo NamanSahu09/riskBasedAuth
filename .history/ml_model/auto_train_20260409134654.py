@@ -11,5 +11,5 @@ while True:
     except Exception as e:
         print("❌ Error:", e)
 
-    print(" Waiting 15 seconds...\n")
-    time.sleep(15)
+    print(" Waiting 10 seconds...\n")
+    time.sleep(30)

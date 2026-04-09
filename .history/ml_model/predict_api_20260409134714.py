@@ -3,10 +3,6 @@ import joblib
 import numpy as np
 from flask_cors import CORS
 import os
-import re
-import threading
-import subprocess
-import time
 
 app = Flask(__name__)
 CORS(app)
@@ -17,63 +13,35 @@ model = None
 last_loaded_time = 0
 
 
-# ===============================
-# AUTO TRAIN THREAD 🔥
-# ===============================
-def auto_train():
-    while True:
-        print("🔁 Auto training running...")
-        subprocess.run(["python", "ml_model/train_model.py"])
-        time.sleep(60)
-
-threading.Thread(target=auto_train, daemon=True).start()
-
-
-# ===============================
-# LOAD MODEL IF UPDATED
-# ===============================
 def load_model_if_updated():
     global model, last_loaded_time
 
     current_time = os.path.getmtime(MODEL_PATH)
 
     if model is None or current_time != last_loaded_time:
-        print("🔄 Reloading model...")
+        print("🔄 Reloading updated model...")
         model = joblib.load(MODEL_PATH)
         last_loaded_time = current_time
 
 
 @app.route("/")
 def home():
-    return "ML API running 🚀"
+    return "ML API running "
 
 
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        load_model_if_updated()
+        load_model_if_updated() 
 
         data = request.json
-        url = data.get("url", "")
 
-        # ===============================
-        # FEATURE ENGINEERING (LIVE)
-        # ===============================
-        https_status = data["https_status"]
-        is_http = 1 if url.startswith("http://") else 0
-        url_length = len(url)
-        has_ip = 1 if re.search(r"\d+\.\d+\.\d+\.\d+", url) else 0
-        suspicious = 1 if any(word in url.lower() for word in ["login","bank","verify","secure"]) else 0
 
         features = np.array([[ 
             data["new_device"],
             data["new_location"],
             data["odd_time"],
-            https_status,
-            is_http,
-            url_length,
-            has_ip,
-            suspicious
+            data["https_status"]
         ]])
 
         prediction = model.predict(features)[0]
