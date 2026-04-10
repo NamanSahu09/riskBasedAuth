@@ -77,14 +77,7 @@ console.log("URL VALUE:", url);
 async function runScan() {
   if (!scanBtn || scanning) return;
 
-  const url = document.getElementById("urlInput").value.trim();
-
-  console.log("Sending URL:", url);
-  
-  if (!url) {
-    alert("Enter URL first!");
-    return;
-  }
+  const url = urlInput ? urlInput.value.trim() : '';
 
   if (!url) {
     if (urlInput) urlInput.focus();
