@@ -11,29 +11,33 @@ import time
 app = Flask(__name__)
 CORS(app)
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "risk_model.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "risk_model.pkl")
+TRAIN_SCRIPT = os.path.join(BASE_DIR, "train_model.py")
 
 model = None
 last_loaded_time = 0
 
 
 # ===============================
-# AUTO TRAIN THREAD 🔥
+# AUTO TRAIN THREAD
 # ===============================
 def auto_train():
     while True:
         print("🔁 Auto training running...")
-        subprocess.run(["python", "ml_model/train_model.py"])
+        subprocess.run(["python", TRAIN_SCRIPT])
         time.sleep(60)
-
-threading.Thread(target=auto_train, daemon=True).start()
 
 
 # ===============================
-# LOAD MODEL IF UPDATED
+# LOAD MODEL SAFE
 # ===============================
 def load_model_if_updated():
     global model, last_loaded_time
+
+    if not os.path.exists(MODEL_PATH):
+        print("⚠ Model not found yet...")
+        return
 
     current_time = os.path.getmtime(MODEL_PATH)
 
@@ -53,12 +57,12 @@ def predict():
     try:
         load_model_if_updated()
 
+        if model is None:
+            return jsonify({"error": "Model not ready yet"})
+
         data = request.json
         url = data.get("url", "")
 
-        # ===============================
-        # FEATURE ENGINEERING (LIVE)
-        # ===============================
         https_status = data["https_status"]
         is_http = 1 if url.startswith("http://") else 0
         url_length = len(url)
@@ -104,4 +108,5 @@ def predict():
 
 
 if __name__ == "__main__":
+    threading.Thread(target=auto_train, daemon=True).start()
     app.run(host="0.0.0.0", port=10000)
