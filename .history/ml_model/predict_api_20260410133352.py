@@ -47,6 +47,7 @@ def extract_features(url):
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
+
         print("Incoming data:", request.json)
         if model is None:
             return jsonify({"error": "Model not loaded"})
