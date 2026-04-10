@@ -1,32 +1,30 @@
 import pandas as pd
-import mysql.connector
 from sklearn.tree import DecisionTreeClassifier
 import joblib
-import re
+import os
+
+print("Training started...")
 
 # ===============================
-# DATABASE CONNECTION (CLOUD)
+# LOAD DATA FROM CSV (CLOUD SAFE)
 # ===============================
-db = mysql.connector.connect(
-    host="sql100.byetcluster.com",
-    user="if0_41559408",
-    password="NamanSahu2003",
-    database="if0_41559408_risk_auth"
-)
+try:
+    DATA_URL = "https://riskauth.infinityfreeapp.com/backend/public/exportcsv.php"
+    df = pd.read_csv(DATA_URL)
 
-query = """
-SELECT new_device, new_location, odd_time, https_status, risk_level
-FROM login_history
-WHERE risk_level IS NOT NULL
-"""
+    print("✅ Dataset Loaded")
+    print(df.head())
 
-df = pd.read_sql(query, db)
-
-if len(df) < 10:
-    print("⚠ Not enough data to train")
+except Exception as e:
+    print("❌ Failed to load dataset:", e)
     exit()
 
-print("✅ Dataset Loaded")
+# ===============================
+# CHECK DATA
+# ===============================
+if df.empty or len(df) < 5:
+    print("⚠ Not enough data to train")
+    exit()
 
 # ===============================
 # LABEL ENCODING
@@ -37,6 +35,9 @@ df["risk_level"] = df["risk_level"].map({
     "HIGH": 2
 })
 
+# Remove null values
+df = df.dropna()
+
 # ===============================
 # FEATURE ENGINEERING
 # ===============================
@@ -44,11 +45,14 @@ df["risk_level"] = df["risk_level"].map({
 # HTTP → risky
 df["is_http"] = df["https_status"].apply(lambda x: 1 if x == 0 else 0)
 
-# dummy values (no URL in DB yet)
+# Since URL not stored in DB → default values
 df["url_length"] = 50
 df["has_ip"] = 0
 df["suspicious"] = 0
 
+# ===============================
+# FEATURES + LABEL
+# ===============================
 X = df[[
     "new_device",
     "new_location",
@@ -68,9 +72,14 @@ y = df["risk_level"]
 model = DecisionTreeClassifier()
 model.fit(X, y)
 
-# ===============================
-# SAVE MODEL
-# ===============================
-joblib.dump(model, "risk_model.pkl")
+print("Model trained successfully")
 
-print("Model Updated Successfully")
+# ===============================
+# SAVE MODEL (VERY IMPORTANT FIX)
+# ===============================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "risk_model.pkl")
+
+joblib.dump(model, MODEL_PATH)
+
+print("✅ Model saved at:", MODEL_PATH)
